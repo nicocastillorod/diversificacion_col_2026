@@ -10,8 +10,3 @@ description: Instructores Taller Colevol 2026
 {% for staffer in instructors %}
 {{ staffer }}
 {% endfor %}
-
-{% for staffer in teaching_assistants %}
-{{ staffer }}
-{% endfor %}
-{% endif %}
