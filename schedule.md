@@ -1,7 +1,7 @@
 ---
 layout: page
-title: Schedule
-description: The weekly event schedule.
+title: Contenido
+description: Materiales día a día.
 ---
 
 # Weekly Schedule
