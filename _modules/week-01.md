@@ -1,23 +1,22 @@
 ---
-title: Introduction to Java
+title: Martes
 ---
 
-Sep 28
-: [Java & Git](#)
-  : [1.1](#)
+21 de Julio 2026
+: **Presentaciones**{: .label .label-green }
+  : [Link](https://docs.google.com/presentation/d/1sA13c5RIwomddgOXAz_c2K9DHnZ7RGu4HDLZ3rkd7Ao/edit?usp=sharing)
 
-Sep 29
-: **Section**{: .label .label-purple }[Intro to Java](#)
-  : [Solution](#)
+: **Software**{: .label .label-blue }
+  : [Software installation](../practicals/software)
+  
+: **Clase**{: .label .label-red }Introducción a las cadenas de Markov
+  : [Diapositivas](https://roszenil.github.io/pcm_naturalistas/slides/ctmc_intro_espanol.pdf)
+  
+ : 
+  : [Notas](https://roszenil.github.io/pcm_naturalistas/practicals/intro_ctmc_espanol.html)  
 
-Sep 30
-: [Variables & Objects](#)
-  : [1.2](#), [2.1](#)
-
-Oct 1
-: **Lab**{: .label .label-purple } [Intro to Java](#)
-
-Oct 2
-: [Tracing, IntLists, & Recursion](#)
-  : [2.1](#)
-: **HW 1 due**{: .label .label-red }
+: **Clase**{: .label .label-red }Introducción a la estadística Bayesiana
+  : [Diapositivas](https://roszenil.github.io/pcm_naturalistas/slides/Inferencia_bayesiana_slides.pdf)
+  
+: **RStudio**{: .label .label-blue } 
+  : [MCMC](https://roszenil.github.io/pcm_naturalistas/practicals/Intro_bayesiana.html)
