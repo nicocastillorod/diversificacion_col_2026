@@ -5,5 +5,7 @@ email: juan.rodriguez@atmosfera.unam.mx
 website: https://www.researchgate.net/profile/Juan-Diego-Rodriguez-Rodriguez/
 photo: juan.jpg
 meta:
-  Estudiante doctoral de la Universidad de Kentucky
+  Estudiante doctoral de la Universidad Nacional Autónoma de México
 ---
+
+  Estudiante doctoral de la Universidad Nacional Autónoma de México
