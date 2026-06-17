@@ -1,8 +1,8 @@
 ---
-title: Martes
+title: 21 de Julio 2026
 ---
 
-21 de Julio 2026
+Martes
 : **Presentaciones**{: .label .label-green }
   : [Link](https://docs.google.com/presentation/d/1sA13c5RIwomddgOXAz_c2K9DHnZ7RGu4HDLZ3rkd7Ao/edit?usp=sharing)
 
