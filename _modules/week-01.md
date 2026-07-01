@@ -4,17 +4,11 @@ title: 21 de Julio 2026
 
 Martes
 : **Presentaciones**{: .label .label-green }
-  : [Link](https://docs.google.com/presentation/d/1sA13c5RIwomddgOXAz_c2K9DHnZ7RGu4HDLZ3rkd7Ao/edit?usp=sharing)
+  : [Link](https://docs.google.com/presentation/d/1nnLAtIoLlf4prnaPEhhq0wRloJSaa9ZSysgL9spyizg/edit?pli=1&slide=id.g3f04098ad75_0_189#slide=id.g3f04098ad75_0_189)
 
 : **Software**{: .label .label-blue }
   : [Software installation](../practicals/software)
   
-: **Clase**{: .label .label-red }Introducción a las cadenas de Markov
-  : [Diapositivas](https://roszenil.github.io/pcm_naturalistas/slides/ctmc_intro_espanol.pdf)
-  
- : 
-  : [Notas](https://roszenil.github.io/pcm_naturalistas/practicals/intro_ctmc_espanol.html)  
-
 : **Clase**{: .label .label-red }Introducción a la estadística Bayesiana
   : [Diapositivas](https://roszenil.github.io/pcm_naturalistas/slides/Inferencia_bayesiana_slides.pdf)
   
