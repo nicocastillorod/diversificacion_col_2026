@@ -100,8 +100,9 @@ rate_matrix := fnFreeK(q, rescaled=false, matrixExponentialMethod="scalingAndSqu
 # Create the constant prior parameters of the diversification rates
 
 total_taxa <- observed_phylogeny.ntips()
+root_age <- observed_phylogeny.rootAge()
 half_sd <- 0.5
-rate_mean <- ln(ln(total_taxa/2.0) / observed_phylogeny.rootAge())
+rate_mean <- ln(ln(total_taxa/2.0) / root_age)
 rate_sd <- 2 * half_sd
 
 # Create a normal distributed variable for the diversification and turnover rates
@@ -156,9 +157,6 @@ root_frequencies ~ dnDirichlet(rep(1,NUM_RATES))
 moves.append(mvDirichletSimplex(root_frequencies,tune=true,weight=2))
 moves.append(mvElementSwapSimplex(root_frequencies, weight=2))
 
-# Create the fix parameter for the age of the root set to the observed age
-
-root_age <- observed_phylogeny.rootAge()
 
 ##############################
 # Indicate sampling fraction #
@@ -218,8 +216,6 @@ mymcmc.run(rules = stopping_rules, checkpointInterval = 1000, checkpointFile = "
 ##############################
 # Summarize ancestral states #
 ##############################
-
-#observed_phylogeny <- readTrees("data/MCC_AFRICANRESTIOS.tre")[1]
 
 anc_states = readAncestralStateTrace("output/asr_hisse_liolaemus_run_1.log")
 

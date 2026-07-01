@@ -13,7 +13,6 @@ Miércoles
 : **Recursos**{: .label .label-purple } Aprendiendo más
   : [Lista de recursos](../practicals/recursos)
 
-: **Discusión**{: .label .label-green } 
-  : Conclusiones del taller: Alcances y limitaciones 
+: **Discusión**{: .label .label-green } Conclusiones del taller: Alcances y limitaciones 
   
 

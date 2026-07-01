@@ -11,7 +11,7 @@
 
 
 
-<title>Hypothesis testing of state-dependent diversification with a full HiSSE model</title>
+<title>HiSSE y prueba de hipótesis de diversificación dependendiente del caracter</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -348,546 +348,411 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Hypothesis testing of state-dependent
-diversification with a full HiSSE model</h1>
-<h3 class="subtitle">Specification of a hidden state-dependent
-speciation and extinction (HiSSE) model with all transitions free and
-two hidden states</h3>
+<h1 class="title toc-ignore">HiSSE y prueba de hipótesis de
+diversificación dependendiente del caracter</h1>
 
 </div>
 
 
-<p>{% section Introduction | introduction %}</p>
-<p>{% citet Beaulieu2016 %} introduced an extension of the Binary
-State-Dependent Speciation and Extinction (BiSSE) model that
-incorporates unobserved (hidden) traits. This development provided a
-more appropriate null model, reducing the high Type I error rate
-previously identified for BiSSE by {% citet Rabosky2015 %}. The
-Character-Independent Diversification (CID) model and the Hidden
-State-Dependent Speciation and Extinction (HiSSE) model incorporate a
-hidden trait with the same number of states and freely varying
-diversification rates as in BiSSE or MuSSE (Multi-State-Dependent
-Speciation and Extinction). Because these models have the same number of
-parameters as BiSSE/MuSSE, they allow fair model comparisons and enable
-the detection of diversification-rate variation arising from unmeasured
-factors.</p>
-<p>As illustrated in {% ref fig_rates%}, when diversification rates do
-not differ among the observed states (0 and 1), the resulting model is a
-CID model, indicating that diversification-rate variation across the
-phylogeny is better explained by unmeasured factors rather than by the
-observed trait. In contrast, when diversification rates differ between
-observed states, the resulting model may correspond to a HiSSE or a
-BiSSE model, depending on whether the hidden states (A and B) differ or
-are equal, respectively. In both cases, variation in diversification
-rates across the phylogeny is associated with the observed trait,
-although it may also be influenced by unobserved factors when a HiSSE
-model is supported. Additionally, some cases exhibit mixed patterns in
-which diversification rates differ for certain states but not for
-others, either within some or all hidden states. For example, {% citet
-tribble2025 %} investigated diversification in sedges of the genus
-<em>Carex</em> and found that some speciation rates were correlated with
-single-chromosome changes, whereas others were unrelated to aneuploidy.
-Such intermediate cases are expected to become increasingly common and
-have recently been described as “gray zone” models.</p>
-<p>{% figure fig_rates %}
-<img role="img" src="figures/rate_comparisons.png" width="80%"> {% figcaption %}
-When we fit a full HiSSE model we can identify four different
-state-dependent diversification models using the posterior net
-diversification rates. a) If <span class="math inline">\(d_0\neq
-d_1\)</span> for <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> but <span class="math inline">\(d_A=d_B\)</span> equal for <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span>, then we have BiSSE. b) If <span class="math inline">\(d_0= d_1\)</span> for <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> but <span class="math inline">\(d_A\neq
-d_B\)</span> for <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span>, then we have CID-2. c) A grey zone
-model is a model that has some net diversifications equal and some
-different. d) If the four posterior distributions for net
-diversifications are different, then the resulting model of
-diversification is HiSSE. Matrices with valid rate comparisons are shown
-for each model, indicating what rates are equal or different, to
-determine what is the best model of state-dependent diversification.
-Comparisons that are not considered are indicated with black dots. {%
-endfigcaption %} {% endfigure %}</p>
-<p>In this tutorial, we describe how to specify an SSE model that
-includes two hidden states and freely estimates all transition and
-diversification rates. Within a Bayesian framework, this approach allows
-the identification of CID, HiSSE, BiSSE, or “gray zone” models.
-Moreover, the framework can be readily expanded to incorporate
-additional observed and hidden states, depending on the specific
-research questions.</p>
-<p>{% section Getting Set Up | materials %}</p>
-<p>For this tutorial, we use data generated from the analysis of {%
-citet Bouchenak-Khelladi2017 %} on the evolution of restio plants in the
-subfamily Restionoideae, which inhabit the diverse Cape Floristic Region
-of South Africa across a range of habitats, including montane
-environments and coastal plains.</p>
-<p>We included two data files that contain the phylogeny and the
-observed trait data:</p>
+<p>Tutorial y script creado por Rosana Zenil-Ferguson y Nicolás
+Castillo-Rodríguez. Actualizaco por Nicolás en Julio 2026.</p>
+<p>En este tutorial vamos a describir cómo especificar un modelo de
+diversificación dependiente del caracter (SSE - State dependent
+speciation and extinction model) que incluye dos estados observados (0 y
+1)y dos estados escondidos (A y B). Al realizar este análisis en un
+contexto Bayesiano empleando RevBayes, podemos distinguir escenarios de
+diversificación independiente del caracter (CID - Character independent
+diversification), diversificación dependiente del caracter (BiSSE -
+Binary SSE), diversificación dependiente de estados escondidos (HiSSE),
+o escenarios intermedios. Consecuentemente, este marco conceptual que
+estamos implementando se puede expandir para incorporar estados
+observados o escondidos adicionales acorde a la pregunta de
+investigación a responder.</p>
+<div id="datos-a-emplear" class="section level2">
+<h2>Datos a emplear</h2>
+<p>Para este tutorial vamos a utilizar los datos generados por Esquerré
+et al. (2019) y Domínguez-Guerrero et al. (2024), quienes evalúan el
+efecto de la viviparidad en la evolución de Liolaemidae.</p>
+<p>Crea un nuevo directorio llamado <code>hisse_tutorial</code>. Dentro
+de este, crea una carpeta llamada <code>data</code> donde guardaremos lo
+siguientes archivos:</p>
 <ul>
-<li><a href="data/MCC_AFRICANRESTIOS.tre">MCC_AFRICANRESTIOS.tre</a>:
-This dated phylogeny, originally presented in {% citet
-Bouchenak-Khelladi2017 %}, was inferred from plastid regions and
-includes 337 restio species, representing 98% of known restio
-diversity.</li>
-<li><a href="data/Elevation_322spp.tsv">Elevation_322spp.tsv</a>: This
-file contains elevation data for 322 of the species present in the
-phylogeny, as defined in {% citet Bouchenak-Khelladi2017 %}. For species
-present in the tree but lacking elevation data, the character state was
-coded as “?”, which can be accommodated by RevBayes.</li>
+<li><a href="downloads/Liolaemidae_146.tree">Filogenia Liolaemidae</a>:
+Desarrollada por Esquerré et al. 2019 (<a href="https://doi.org/10.1111/evo.13657" class="uri">https://doi.org/10.1111/evo.13657</a>)</li>
+<li><a href="downloads/liolaemidae_viviparity.csv">Datos viviparidad
+Liolaemidae</a>: Desarrollada por Domínguez-Guerrero et al. 2024 (<a href="https://doi.org/10.1038/s41467-024-49464-x" class="uri">https://doi.org/10.1038/s41467-024-49464-x</a>)</li>
+<li><a href="downloads/hisse_8_transitions.Rev">Script completo</a></li>
 </ul>
-<blockquote>
-<p>Create a new directory on your computer named
-<code>hisse_tutorial</code>.</p>
-<p>Inside this directory, add a subfolder called <code>data</code> to
-store the provided files. Also within <code>hisse_tutorial</code>,
-create a <code>scripts</code> folder to save the analysis script, or
-alternatively run RevBayes interactively by launching RevBayes and
-entering the code below. {:.instruction}</p>
-</blockquote>
-<p>{% section Setting up a HiSSE model | script %}</p>
-<p>Following the hypothesis of {% citet Bouchenak-Khelladi2017 %}, we
-aim to test whether species inhabiting older (montane) habitats exhibit
-higher net diversification rates than those occupying younger (lowland)
-habitats in the Cape Floristic Region. To this end, we define a HiSSE
-model that allows all transition rates to be freely estimated. In this
-analysis, the coded character, as presented in the <a href="data/Elevation_322spp.tsv">Elevation_322spp.tsv</a> file, assigns
-species inhabiting coastal plains to state 0 and species inhabiting
-montane areas to state 1.</p>
-<p>Accordingly, the specified model includes a total of four speciation
-rates (<em>λ</em>), four extinction rates (<em>μ</em>), and eight
-anagenetic transition rates (<em>q</em>). Transition rate notation
-indicates the ancestral and descendant states, separated by a comma.</p>
-<p>{% figure fig_model %}
-<img role="img" src="figures/hisse_8_transitions.png" width="50%"> {% figcaption %}
-Graphic representation of the specified HiSSE model. In this model, an
-observed binary state is defined as 0 or 1 and unobserved states are
-defined as A (green) orr B (yellow). Lineages can be at states 0A, 0B,
-1A, or 1B, each of them characterized by a distinct speciation and
-extinction rate. In this case, every transition between states is
-freelly estimated. {% endfigcaption %} {% endfigure %}</p>
-<p>{% subsection Read in the Data | subsec_readdata %}</p>
-<p>We start by setting the number of observed and hidden states, as well
-as an extra helper variable that indicates the total number of
-states.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} NUM_STATES &lt;- 2
-NUM_HIDDEN &lt;- 2 NUM_RATES = NUM_STATES * NUM_HIDDEN {% endsnippet
-%}</p>
-<p>In this analysis, we assume a fixed tree topology that corresponds to
-our dated phylogeny. Likewise, we read the data file that includes the
-observed state information for each species.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} observed_phylogeny
-&lt;- readTrees(“data/MCC_AFRICANRESTIOS.tre”)[1]</p>
-<p>data &lt;- readCharacterDataDelimited(“data/Elevation_322spp.tsv”,
-stateLabels=2, type=“NaturalNumbers”, delimiter=“, header=FALSE) {%
-endsnippet %}</p>
-<p>We need to expand the data to include the hidden states, and
-therefore use the <code>expandCharacters</code> function with the
-appropriate number of hidden states.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} data_exp &lt;-
-data.expandCharacters(NUM_HIDDEN) {% endsnippet %}</p>
-<p>Finally, we add a variable to store the moves and monitors that will
-be used in this model.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} moves = VectorMoves()
-monitors = VectorMonitors() {% endsnippet %}</p>
-<p>{% subsection Specify the Model | subsec_specifymodel %}</p>
-<div id="transition-rates" class="section level4">
-<h4><strong>Transition rates</strong></h4>
-<p>We begin by setting the transition rates of the model. These
-parameters will be estimated from a gamma distribution. Consequently, we
-first set up the priors using a loose shape parameter value of 0.5 and a
-rate parameter equal to the total phylogeny length in millions of years
-divided by the expected number of changes per lineage.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} shape_pr &lt;- 0.5
-rate_pr := observed_phylogeny.treeLength()/10 {% endsnippet %}</p>
-<p>Next, we specify the transition rates between observed and hidden
-states, as previously illustrated in {% ref fig_model %}:</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} #Transitions between
-observed states q_0A1A ~ dnGamma(shape=shape_pr, rate=rate_pr) q_1A0A ~
-dnGamma(shape=shape_pr, rate=rate_pr) q_0B1B ~ dnGamma(shape=shape_pr,
-rate=rate_pr) q_1B0B ~ dnGamma(shape=shape_pr, rate=rate_pr)
-#Transitions between hidden states q_0A0B ~ dnGamma(shape=shape_pr,
-rate=rate_pr) q_0B0A ~ dnGamma(shape=shape_pr, rate=rate_pr) q_1A1B ~
-dnGamma(shape=shape_pr, rate=rate_pr) q_1B1A ~ dnGamma(shape=shape_pr,
-rate=rate_pr) {% endsnippet %}</p>
-<p>We then add moves to the vectors previously created. In this case, we
-use the <code>mvSlice</code> move, which proposes a new value for a
-parameter by sampling from the region of the likelihood distribution
-defined by its current value.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %}
-moves.append(mvSlice(q_0A1A, window = 0.1, weight=2, search_method =
-“stepping_out”)) moves.append(mvSlice(q_1A0A, window = 0.1, weight=2,
-search_method = “stepping_out”)) moves.append(mvSlice(q_0B1B, window =
-0.1, weight=2, search_method = “stepping_out”))
-moves.append(mvSlice(q_1B0B, window = 0.1, weight=2, search_method =
-“stepping_out”))</p>
-<p>moves.append(mvSlice(q_0A0B, window = 0.1, weight=2, search_method =
-“stepping_out”)) moves.append(mvSlice(q_0B0A, window = 0.1, weight=2,
-search_method = “stepping_out”)) moves.append(mvSlice(q_1A1B, window =
-0.1, weight=2, search_method = “stepping_out”))
-moves.append(mvSlice(q_1B1A, window = 0.1, weight=2, search_method =
-“stepping_out”)) {% endsnippet %}</p>
-<p>A key difference between the approach presented here and the one in
-<a href="%7B%7B%20base.url%20%7D%7D/tutorials/sse/hisse">the HiSSE
-tutorial</a> is that we explicitly define every rate in the transition Q
-matrix. This allows us to incorporate asymmetric transition rates
-between both observed and hidden states.</p>
-<p>To construct the Q matrix, we first initialize a matrix with zeros
-and then replace the appropriate elements with the corresponding
-transition rates:</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} for (i in 1:NUM_RATES)
-{ for (j in 1:NUM_RATES) { q[i][j] := 0.0 } }</p>
-<p>q[1][2] := q_0A1A q[2][1] := q_1A0A q[1][3] := q_0A0B q[3][1] :=
-q_0B0A q[2][4] := q_1A1B q[4][2] := q_1B1A q[3][4] := q_0B1B q[4][3] :=
-q_1B0B {% endsnippet %}</p>
-<p>To generate the final rate matrix, we use the <code>fnFreeK</code>
-function instead of <code>fnHiddenStateRateMatrix</code>, since the
-latter does not allow all asymmetric transition rates.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} rate_matrix :=
-fnFreeK(q, rescaled=false, matrixExponentialMethod=“scalingAndSquaring”)
-{% endsnippet %}</p>
+<p>En total contamos con una filogenia con 146 especies, de las cuales
+contamos información sobre viviparidad para todas. Sin embargo, RevBayes
+puede acomodarse a especies para las que no tenemos datos de caracter,
+indicando “?”. En este set de datos, hemos descrito como 0 las especies
+ovoviparas y como 1 las especies viviparas.</p>
 </div>
-<div id="diversification-rates" class="section level4">
-<h4><strong>Diversification rates</strong></h4>
-<p>We now specify speciation and extinction rates for each state. These
-parameters are sampled from log-normal distributions. To achieve this,
-we first define auxiliary parameters drawn from normal distributions and
-then exponentiate them to ensure positive values. We start by defining
-the following priors:</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} total_taxa &lt;-
-observed_phylogeny.ntips() half_sd &lt;- 0.5 rate_mean &lt;-
-ln(ln(total_taxa/2.0) / observed_phylogeny.rootAge()) rate_sd &lt;- 2 *
-half_sd {% endsnippet %}</p>
-<p>The mean of these distributions is based on the statistic <span class="math display">\[\frac{\log(N/2)}{T}\]</span> which represents the
-method of moments estimate of the diversification rate under a
-birth–death model when extinction is negligible. This estimator
-approximates the diversification rate based on the observed number of
-lineages <em>N</em> after a time <em>T</em> when starting from a crown
-group {% cite magallon2001 %}. Here, the total number of extant lineages
-(<em>N</em>) is stored in <code>total_taxa</code>, and the total time
-(<em>T</em>) is given by <code>observed_phylogeny.rootAge()</code>.
-Because speciation and extinction rates are modeled on the log scale, we
-defined <code>rate_mean</code>, the mean of the normal prior
-distributions, as <span class="math display">\[{log(\frac{\log(N/2)}{T})}\]</span>. The standard
-deviation is chosed to represent uncertainty around the expected
-diversification rate.</p>
-<p>Using a <code>for</code> loop, we first define speciation and
-extinction rates for the observed states and assign two types of moves
-to each parameter (<code>mvSlide</code> and <code>mvSlice</code>). The
-<code>mvSlide</code> move proposes a new value by sampling from a
-uniform distribution and adding it to the current value.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} for (i in 1:NUM_STATES)
-{</p>
-<pre><code>speciation_alpha[i] ~ dnNormal(mean=rate_mean,sd=rate_sd)
-moves.append(mvSlide(speciation_alpha[i],delta=0.20,tune=true,weight=2.0))
-moves.append(mvSlice(speciation_alpha[i],window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
+<div id="describiendo-un-hisse-en-revbayes" class="section level2">
+<h2>Describiendo un HiSSE en RevBayes</h2>
+<p>Siguiendo la hipótesis de Esquerré et al. (2019), queremos prbar si
+la viviparidad tiene un efecto sobre la diversificación de Liolaemidae.
+Por lo tanto, hemos descrito un modelo HiSSE en el que se permite
+libremente la estimación de todas las tasas de trancisiones entre
+estados.</p>
+<p>Por lo tanto, hemos especificado un total de cuatro tasas de
+especiación (<em>λ</em>), cuatro tasas de extinción (<em>μ</em>), y ocho
+tasas que corresponden a transiciones anagenéticas (<em>q</em>). La
+notación de las tasas de transición indica el estado ancestral y
+derivado, separado por una coma.</p>
+<p>Antes de continuar, dibuja el modelo gráfico propuesto.</p>
+<div id="cargando-los-datos-en-revbayes" class="section level3">
+<h3>Cargando los datos en RevBayes</h3>
+<p>En este ejemplo, tenemos dos estados observados (0 y 1) y definimos
+dos estados escondidos (A y B). Por lo tanto, contamos con cuatro
+estados (0A, 1A, 0B, 1B), cada uno con su propia tasa de
+diversificación, es decir, estableceremos cuatro tasas de especiación y
+cuatro tasas de extinción.</p>
+<pre><code>NUM_STATES &lt;- 2
+NUM_HIDDEN &lt;- 2
+NUM_RATES = NUM_STATES * NUM_HIDDEN</code></pre>
+<p>Utilizando las funciones <code>readTrees</code> y
+<code>readCharacterDataDelimited</code>, cargamos en RevBayes los
+archivos con la filogenia y caracteres a utilizar.</p>
+<pre><code>observed_phylogeny &lt;- readTrees(&quot;data/MCC_AFRICANRESTIOS.tre&quot;)[1]
 
-extinction_alpha[i] ~ dnNormal(mean=rate_mean,sd=rate_sd)
-moves.append(mvSlide(extinction_alpha[i],delta=0.20,tune=true,weight=2.0))
-moves.append(mvSlice(extinction_alpha[i],window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))</code></pre>
-<p>} {% endsnippet %}</p>
-<p>To incorporate the additional variation represented by the hidden
-states, we define another set of normally distributed variables for the
-speciation and extinction rates. We also assign the same two types of
-moves to these parameters.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} for (i in
-1:(NUM_HIDDEN-1)) {</p>
-<pre><code>speciation_beta[i] ~ dnNormal(0.0,1.0)
-moves.append(mvSlice(speciation_beta[i],window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
-moves.append(mvSlide(speciation_beta[i],delta=0.20,tune=true,weight=2.0))
-
-extinction_beta[i] ~ dnNormal(0.0,1.0)
-moves.append(mvSlice(extinction_beta[i],window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
-moves.append(mvSlide(extinction_beta[i],delta=0.20,tune=true,weight=2.0))</code></pre>
-<p>} {% endsnippet %}</p>
-<p>Finally, we define the speciation and extinction rates using a
-<code>for</code> loop. The first set of rates, corresponding to the
-states 0A and 1A, are simply the exponentiated values of
-<code>speciation_alpha</code> and <code>extinction_alpha</code>. For the
-states 0B and 1B, their diversification parameters include the
-additional variation from <code>speciation_beta</code> and
-<code>extinction_beta</code>.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} for (j in 1:NUM_HIDDEN)
-{ for (i in 1:NUM_STATES) { if ( j == 1) { speciation[i] := exp(
-speciation_alpha[i] ) extinction[i] := exp( extinction_alpha[i] ) } else
-{ index = i+(j*NUM_STATES)-NUM_STATES speciation[index] := exp(
-speciation_alpha[i] + speciation_beta[j-1] ) extinction[index] := exp(
-extinction_alpha[i] + extinction_beta[j-1] ) } } } {% endsnippet %}</p>
-<p>We conclude by defining a net diversification variable, calculated as
-the difference between speciation and extinction rates for each state.
-Turnover rates, defined as the ratio of extinction to speciation, could
-also be used.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} net_diversification :=
-speciation - extinction {% endsnippet %}</p>
+data &lt;- readCharacterDataDelimited(&quot;data/Elevation_322spp.tsv&quot;,
+                                   stateLabels=2,
+                                   type=&quot;NaturalNumbers&quot;,
+                                   delimiter=&quot;\t&quot;,
+                                   header=FALSE)</code></pre>
+<p>Con la función <code>expandCharacters</code> extendemos nuestros
+datos de 0 y 1, a 0A, 0B, 1A y 1B.</p>
+<pre><code>data_exp &lt;- data.expandCharacters(NUM_HIDDEN)</code></pre>
+<p>Finalmente, creamos un vector <code>moves</code> que guarda las
+propuestas de movimientos que estableceremos para cada parámetro. Así
+mismo, el vector <code>monitors</code> guarda la inferencia obtenida del
+modelo, incluyendo la distribución posterior para cada uno de los
+parámetros.</p>
+<pre><code>moves = VectorMoves()
+monitors = VectorMonitors()</code></pre>
 </div>
-<div id="root-state" class="section level4">
-<h4><strong>Root State</strong></h4>
-<p>To estimate the root state frequencies, we define a constant vector
-containing the prior probabilities of each rate category at the root.
-This variable accounts for the total number of states and is sampled
-from a Dirichlet distribution, which constrains the elements of the
-vector to sum to 1. Furthermore, we assign two types of moves to this
-parameter: <code>mvDirichletSimplex</code> and
-<code>mvElementSwapSimplex</code>. The former, which is specifically
-designed for Dirichlet distributed parameters, proposes random changes
-to the values of the vector while maintaining the simplex constraint.
-The latter swaps the values of two elements within the vector, improving
-mixing across states.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} root_frequencies ~
-dnDirichlet(rep(1,NUM_RATES))
+<div id="especificando-las-tasas-de-transición" class="section level3">
+<h3>Especificando las tasas de transición</h3>
+<p>Para las tasas de transición en nuestro modelo, utilizaremos
+distribuciones Gamma para nuestros <em>a priori</em>. A cada parámetro
+asignmaos un movimiento específico:</p>
+<pre><code>shape_pr &lt;- 0.5
+rate_pr := observed_phylogeny.treeLength()/10
+
+#Transiciones entre estados observados
+q_0A1A ~ dnGamma(shape=shape_pr, rate=rate_pr)
+q_1A0A ~ dnGamma(shape=shape_pr, rate=rate_pr)
+q_0B1B ~ dnGamma(shape=shape_pr, rate=rate_pr)
+q_1B0B ~ dnGamma(shape=shape_pr, rate=rate_pr)
+#Transiciones entre estados escondidos
+q_0A0B ~ dnGamma(shape=shape_pr, rate=rate_pr)
+q_0B0A ~ dnGamma(shape=shape_pr, rate=rate_pr)
+q_1A1B ~ dnGamma(shape=shape_pr, rate=rate_pr)
+q_1B1A ~ dnGamma(shape=shape_pr, rate=rate_pr)
+
+moves.append(mvSlice(q_0A1A, window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
+moves.append(mvSlice(q_1A0A, window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
+moves.append(mvSlice(q_0B1B, window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
+moves.append(mvSlice(q_1B0B, window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
+
+moves.append(mvSlice(q_0A0B, window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
+moves.append(mvSlice(q_0B0A, window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
+moves.append(mvSlice(q_1A1B, window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
+moves.append(mvSlice(q_1B1A, window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))</code></pre>
+<p>Vamos a revisar la forma de las distribuciones de nuestros priors en
+<a href="https://mikeryanmay.shinyapps.io/plotprior/" class="uri">https://mikeryanmay.shinyapps.io/plotprior/</a> , por qué
+establecemos estos valores?</p>
+<p>Para definir la Q matriz, vamos primero a crear un matriz con valores
+de 0 que posteriormente reemplazaremos con los elementos adecuados según
+las tasas de transición. En la Q matriz, las posiciones corresponden a:
+1=0A, 2=1A, 3=0B, y 4=1B:</p>
+<pre><code>for (i in 1:NUM_RATES) {
+    for (j in 1:NUM_RATES) {
+        q[i][j] := 0.0
+    }
+}
+
+q[1][2] := q_0A1A
+q[2][1] := q_1A0A
+q[1][3] := q_0A0B
+q[3][1] := q_0B0A
+q[2][4] := q_1A1B
+q[4][2] := q_1B1A
+q[3][4] := q_0B1B
+q[4][3] := q_1B0B</code></pre>
+<p>Establecemos la Q matriz mediante la función <code>fnFreeK</code>. La
+Q matriz es una matriz infinitesimal, lo que significa que es la
+derivada de la matriz de probabilidades:</p>
+<pre><code>rate_matrix := fnFreeK(q, rescaled=false, matrixExponentialMethod=&quot;scalingAndSquaring&quot;)</code></pre>
+</div>
+<div id="especificando-las-tasas-de-diversificación" class="section level3">
+<h3>Especificando las tasas de diversificación</h3>
+<p>Con el fin de establecer las tasas de diversificación, usaremos un
+multiplicador llamado <code>speciation_alpha</code> para los estados
+cuyo valor escondido correpsonda a A, al que sumaremos un parámetro
+definido como <code>speciation_beta</code> para los estados cuyo estado
+escondido corresponda a B. Definimos los valores de diversificación de
+esta manera ya que teóricamente los estados A y B derivan del mismo
+estado observado.</p>
+<pre><code># Priors para las tasas de diversificación
+total_taxa &lt;- observed_phylogeny.ntips()
+root_age &lt;- observed_phylogeny.rootAge()
+half_sd &lt;- 0.5
+rate_mean &lt;- ln(ln(total_taxa/2.0) / root_age)
+rate_sd &lt;- 2 * half_sd</code></pre>
+<p>Especiación y extinción definidas a partir de una distribución log
+normal, definida primero a partir de una distribución normal que
+posteriormente exponenciamos. Definimos la mediana de esta distribución
+como el estadístico <span class="math display">\[\frac{\log(N/2)}{T}\]</span> Este corresponde a
+la tasa de diversificación esperada en un modelo de nacimiento sin
+extinción (Ver Magallón y Sanderson 2001: <a href="https://doi.org/10.1111/j.0014-3820.2001.tb00826.x" class="uri">https://doi.org/10.1111/j.0014-3820.2001.tb00826.x</a>
+).</p>
+<pre><code>for (i in 1:NUM_STATES) {
+
+    speciation_alpha[i] ~ dnNormal(mean=rate_mean,sd=rate_sd)
+    moves.append(mvSlide(speciation_alpha[i],delta=0.20,tune=true,weight=2.0))
+    moves.append(mvSlice(speciation_alpha[i],window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
+
+    extinction_alpha[i] ~ dnNormal(mean=rate_mean,sd=rate_sd)
+    moves.append(mvSlide(extinction_alpha[i],delta=0.20,tune=true,weight=2.0))
+    moves.append(mvSlice(extinction_alpha[i],window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
+
+}
+
+for (i in 1:(NUM_HIDDEN-1)) {
+
+    speciation_beta[i] ~ dnNormal(0.0,1.0)
+    moves.append(mvSlice(speciation_beta[i],window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
+    moves.append(mvSlide(speciation_beta[i],delta=0.20,tune=true,weight=2.0))
+
+    extinction_beta[i] ~ dnNormal(0.0,1.0)
+    moves.append(mvSlice(extinction_beta[i],window = 0.1, weight=2, search_method = &quot;stepping_out&quot;))
+    moves.append(mvSlide(extinction_beta[i],delta=0.20,tune=true,weight=2.0))
+
+}
+
+for (j in 1:NUM_HIDDEN) {
+    for (i in 1:NUM_STATES) {
+        if ( j == 1) {
+            speciation[i] := exp( speciation_alpha[i] )
+            extinction[i] := exp( extinction_alpha[i] )
+        } else {
+            index = i+(j*NUM_STATES)-NUM_STATES
+            speciation[index] := exp( speciation_alpha[i] + speciation_beta[j-1] )
+            extinction[index] := exp( extinction_alpha[i] + extinction_beta[j-1] )
+        }
+    }
+}
+
+net_diversification := speciation - extinction</code></pre>
+</div>
+<div id="estimación-del-caracter-en-la-raíz-del-árbol" class="section level3">
+<h3>Estimación del caracter en la raíz del árbol</h3>
+<p>Ya que desconocemos si el ancestro común más reciente de todos los
+taxones de nuestra filogenia era viviparo u oviparo, necesitamos estimar
+el valor del caracter en la raíz del árbol. En el marco de la
+estadística bayesiana, las frecuencias en la raíz son dos parámetros
+adicionales que debemos estimar. Por lo tanto, asumiremos frecuencias
+iniciales iguales para cada estado. Dado que hay dos estados,
+necesitaremos una distribución <em>a priori</em> bivariada para un
+vector con dos frecuencias que sumen 1. Una distribución muy útil para
+este propósito es la distribución de Dirichlet, una distribución de
+probabilidad multivariada que nos permite asignar la misma frecuencia a
+ambos estados.</p>
+<pre><code>root_frequencies ~ dnDirichlet(rep(1,NUM_RATES))
 moves.append(mvDirichletSimplex(root_frequencies,tune=true,weight=2))
-moves.append(mvElementSwapSimplex(root_frequencies, weight=2)) {%
-endsnippet %}</p>
-<p>As an additional useful variable, we define a parameter that stores
-the age of the tree root:</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} root_age &lt;-
-observed_phylogeny.rootAge() {% endsnippet %}</p>
+moves.append(mvElementSwapSimplex(root_frequencies, weight=2))</code></pre>
 </div>
-<div id="extant-sampling" class="section level4">
-<h4><strong>Extant sampling</strong></h4>
-<p>To specify the probability of sampling species at the present, we
-create a constant node than indicates the proportion of clade species
-that are sampled in our phylogeny. We indicate the total number of
-species in the clase to 350 to match the 98% sampling that was indicated
-by {% citet Bouchenak-Khelladi2017 %}.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} total_clade &lt;- 350
-extant_sampling &lt;- total_taxa/total_clade {% endsnippet %}</p>
+<div id="especificación-de-la-fracción-del-muestreo" class="section level3">
+<h3>Especificación de la fracción del muestreo</h3>
+<p>Para modelos de diversificación necesitamos especificar la proporción
+de linajes del clado que fueron muestreadas en nuestra filogenia:</p>
+<pre><code># Liolaemus: 280, Phymaturus: 52
+
+total_clade &lt;- 332
+extant_sampling &lt;- total_taxa/total_clade</code></pre>
 </div>
-<div id="the-time-tree" class="section level4">
-<h4><strong>The time tree</strong></h4>
-<p>We specified a variable for the time tree drawn from a birth–death
-process using the <code>dnCDBDP</code> function, incorporating all
-previously defined parameters.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} hisse ~ dnCDBDP(rootAge
-= root_age, speciationRates = speciation, extinctionRates = extinction,
-Q = rate_matrix, pi = root_frequencies, rho = extant_sampling) {%
-endsnippet %}</p>
-<p>Finally, we proceed to attach the fixed topology and the observed
-character states using the <code>clamp</code> and
-<code>clampCharData</code> functions.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %}
-hisse.clamp(observed_phylogeny) hisse.clampCharData(data_exp) {%
-endsnippet %}</p>
-<p>{% subsection Running the MCMC analysis | subsec_runningmcmc %}</p>
+<div id="construir-modelo-hisse" class="section level3">
+<h3>Construir modelo HiSSE</h3>
+<p>Con el fin de conectar todos los nodos de este modelo, utilizaremos
+una distribución de probabilidad para árboles filogenéticos. Esta
+distribución de probabilidad es la que calcula internamente la función
+de verosimilitud a lo largo del árbol y considera la distribución <em>a
+priori</em> de los parámetros en toda la estructura del árbol.</p>
+<pre><code>#  La función dnCDBDP (Character-dependent birth-death process) establece una distribución de probabilidad para un modelo de Markov que es un proceso de nacimiento y muerte dependiente de caracter a lo largo del árbol filogenético.
+
+hisse ~ dnCDBDP(rootAge         = root_age,
+                speciationRates = speciation,
+                extinctionRates = extinction,
+                Q               = rate_matrix,
+                pi              = root_frequencies,
+                rho             = extant_sampling)</code></pre>
+<p>Utilizamos la función <code>clamp</code> que permite que la función
+<code>dnCDBDP()</code> tenga en cuenta los datos.</p>
+<pre><code>hisse.clamp(observed_phylogeny)
+hisse.clampCharData(data_exp) </code></pre>
 </div>
-<div id="the-model-object" class="section level4">
-<h4><strong>The model object</strong></h4>
-<p>We define a workspace object for our model using the
-<code>model</code> function. Because all components of the model are
-interconnected, we can initialize the model using any node within it;
-here, we use the <code>rate_matrix</code> node.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} mymodel =
-model(rate_matrix) {% endsnippet %}</p>
+<div id="guardar-nuestra-inferencia" class="section level3">
+<h3>Guardar nuestra inferencia</h3>
+<p>A lo largo del código hemos especificado distintos <code>moves</code>
+que corresponden a las propuestas del MCMC para cada parámetro:</p>
+<p>Breve descripción de las propuestas:</p>
+<ul>
+<li><code>mvScale(q_0A1A, weight=2)</code> esta propuesta reescala el
+valor original de <span class="math display">\[q_{0A1A}\]</span> dos
+veces por iteración.</li>
+<li><code>mvSlide(speciation_alpha[i],delta=0.20,tune=true,weight=2.0)</code>
+esta propuesta define una ventana que se desliza a través de los valores
+del parámetro y ajusta el tamaño de la ventana a medida que avanza el
+MCMC.</li>
+<li><code>mvDirichletSimplex(root_frequencies,tune=true,weight=2)</code>
+esta función propone dos valores en el intervalo (0,1) cuya suma es
+igual a 1. Estos representan la frecuencia con la que encontraríamos el
+estado 0 o el estado 1 en la raíz del árbol.</li>
+<li><code>mvElementSwapSimplex(root_frequencies, weight=3)</code> esta
+función propone intercambiar las frecuencias. Por ejemplo, si tenemos
+(0.4, 0.6), elementswap intercambia la posición de esos valores,
+resultando en (0.6, 0.4).</li>
+</ul>
+<p>Cada una de estas propuestas contribuye a los <em>momios a
+posteriori</em>, si estos mejoran, la propuesta puede ser entonces
+aceptada.</p>
+<div id="guardar-modelo-gráfico" class="section level4">
+<h4>Guardar modelo gráfico</h4>
+<p>Este es un paso importante en el software RevBayes. Queremos
+“guardar” todo el objeto gráfico para poder manipularlo posteriormente.
+La función <code>model()</code> nos permite hacer esto.</p>
+<pre><code>mymodel = model(rate_matrix)</code></pre>
 </div>
-<div id="monitors" class="section level4">
-<h4><strong>Monitors</strong></h4>
-<p>By setting up the monitors, we will output parameter values to both
-file and screen. First, we save all parameter estimates to a log file
-using the <code>mnModel</code> function. Furthermore, because we are
-interested in reconstructing the evolution of the elevation trait across
-the phylogeny, we specify both ancestral state and stochastic character
-mapping monitors using the <code>mnJointConditionalAncestralState</code>
-and <code>mnStochasticCharacterMap</code> functions. These outputs will
-subsequently be used to identify which lineages correspond to each
-hidden state and to infer elevation shifts throughout the evolutionary
-history of restios. Finally, the <code>mnScreen</code> function allows
-us to monitor the progress of the analysis for the specified
-parameters.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %}
-monitors.append(mnModel(filename=“output/hisse_8_transitions.log”,
-printgen=10))
-monitors.append(mnJointConditionalAncestralState(tree=hisse,
-cdbdp=hisse, type=“NaturalNumbers”, printgen=500, withTips=true,
-withStartStates=false, filename=“output/asr_hisse_8_transitions.log”))
-monitors.append(mnStochasticCharacterMap(cdbdp=hisse,printgen=500,filename=“output/stochmap_hisse_8_transitions.log”,
-include_simmap=true)) monitors.append(mnScreen(printgen=10, speciation,
-extinction, net_diversification)) {% endsnippet %}</p>
+<div id="especificar-monitores" class="section level4">
+<h4>Especificar monitores</h4>
+<p>Los monitores almacenan toda nuestra inferencia; sin ellos no será
+posible recuperar las distribuciones posteriores. Existen muchos tipos
+de monitores, como se muestra a continuación:</p>
+<pre><code>monitors.append(mnModel(filename=&quot;output/hisse_liolaemus.log&quot;, printgen=10))
+#monitors.append(mnJointConditionalAncestralState(tree=hisse, cdbdp=hisse, type=&quot;NaturalNumbers&quot;, printgen=500, withTips=true, withStartStates=false, filename=&quot;output/asr_hisse_liolaemus.log&quot;))
+#monitors.append(mnStochasticCharacterMap(cdbdp=hisse,printgen=500,filename=&quot;output/stochmap_hisse_liolaemus.log&quot;, include_simmap=true))
+monitors.append(mnScreen(printgen=10, speciation, extinction, net_diversification))</code></pre>
+<ul>
+<li><code>mnModel</code> guarda las muestras de la distribución
+posterior generadas por el algoritmo MCMC.</li>
+<li><code>mnScreen</code> imprime información en pantalla para saber que
+el análisis está en ejecución.</li>
+<li><code>mnJointConditionalAncestralState</code> guarda la
+reconstrucción de estados ancestrales utilizando la probabilidad
+posterior marginal (esto es muy diferente a lo que hacen phytools u
+otros programas).</li>
+<li><code>mnStochasticCharacterMap</code> calcula mapas estocásticos de
+caracteres, es decir, las transiciones que ocurren a lo largo de las
+ramas. Esto es muy importante, pero también muy difícil de
+calcular.</li>
+</ul>
 </div>
-<div id="creating-and-running-the-mcmc" class="section level4">
-<h4><strong>Creating and Running the MCMC</strong></h4>
-<p>We create the MCMC workspace using the <code>mcmc</code> function,
-specifying the previously defined model object, along with the vectors
-of monitors and moves, and the number of chains to be run. We set the
-number of runs to two in order to assess convergence of the parameter
-estimates.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} mymcmc = mcmc(mymodel,
-monitors, moves, nruns=2, moveschedule=“random”) {% endsnippet %}</p>
-<p>In this case, we define a total of 250,000 generations for our
-analyses. However, as an alternative approach, we recommend defining the
-number of generations using a stopping rule that specifies a minimum
-effective sample size (ESS) of 250 for each parameter, which can be
-implemented using the <code>srMinESS</code> function. In addition, it is
-also useful to create a checkpoint file to allow the analysis to be
-resumed in case it is interrupted for any reason.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} mymcmc.run(generations
-= 250000, checkpointInterval = 1000, checkpointFile =
-“output/hisse_8_transitions.state”) {% endsnippet %}</p>
-<p>{% aside Using TensorPhylo %}</p>
-<p>Alternatively, we recommend using the TensorPhylo plugin {% cite
-May2022 %}. It provides an alternative, general SSE likelihood function
-that offers faster likelihood calculations. TensorPhylo can be installed
-by following these instructions: <a href="https://bitbucket.org/mrmay/tensorphylo/src/a1314e61f180bd46a4de529bc6d26c434d1d442a/doc/Install.md">Installing
-TensorPhylo using the installer script</a>.</p>
-<p>To use TensorPhylo, we need to make a few minor modifications to the
-previously presented script. First, we load the TensorPhylo plugin and
-specify its installation path using the <code>loadPlugin</code>
-function:</p>
-<pre><code>loadPlugin(&quot;TensorPhylo&quot;, &quot;/path/to/tensorphylo/build/installer/lib&quot;)</code></pre>
-<p>Next, we create a node that specifies the taxa present in the
-phylogeny:</p>
-<p>{% snippet scripts/hisse_8_transitions_tp.Rev %} taxa &lt;-
-observed_phylogeny.taxa() {% endsnippet %}</p>
-<p>Finally, we replace <code>dnCDBDP</code> with <code>dnGLHBDSP</code>.
-In addition, we include the taxa node and specify NUM_RATES in the
-arguments of the function.</p>
-<p>{% snippet scripts/hisse_8_transitions_tp.Rev %} hisse ~
-dnGLHBDSP(rootAge = root_age, lambda = speciation, mu = extinction, eta
-= rate_matrix, pi = root_frequencies, rho = extant_sampling, taxa =
-taxa, nProc = 4, nStates = NUM_RATES) {% endsnippet %}</p>
-<p>{% endaside %}</p>
-<p>{% section Summarizing and interpreting results | secanalysis %}</p>
-<p>{% subsection Ancestral States | subsec_asr_stoch %}</p>
+<div id="ejecutar-el-mcmc" class="section level4">
+<h4>Ejecutar el MCMC</h4>
+<p>En lugar de establecer un número fijo de generaciones, establecemos
+que el análisis se ejecute hasta que todos los parámetros en el modelo
+tengan un tamaño de muestra efectivo de al menos 250. Así mismo,
+incluimos checkpoints con el fin de retomar nuestro análisis si este es
+interrumpido.</p>
+<pre><code>mymcmc = mcmc(mymodel, monitors, moves, nruns=2, moveschedule=&quot;random&quot;)
+
+#mymcmc.initializeFromCheckpoint(&quot;output/hisse_liolaemus.state&quot;)
+
+stopping_rules[1] = srMinESS(250, file = &quot;output/hisse_liolaemus.log&quot;, freq = 10000)
+
+mymcmc.run(rules = stopping_rules, checkpointInterval = 1000, checkpointFile = &quot;output/hisse_liolaemus.state&quot;)
+
+#mymcmc.run(generations = 250000, checkpointInterval = 1000, checkpointFile = &quot;output/hisse_liolaemus.state&quot;)</code></pre>
 </div>
-<div id="summarize-sampled-ancestral-states" class="section level4">
-<h4><strong>Summarize Sampled Ancestral States</strong></h4>
-<p>To summarize the sampled ancestral states, to be susequently plotted
-using the <code>RevGadgets</code> {% cite Tribble2022 %} R package, we
-can use the <code>readAncestralStateTrace</code> and
-<code>ancestralStateTree</code> functions in RevBayes. The latter will
-produce an annotated phylogeny by summarizing at each node the maximum a
-posteriori (MAP) state.</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} anc_states =
-readAncestralStateTrace(“output/asr_hisse_8_transitions_run_1.log”)</p>
-<p>anc_tree =
-ancestralStateTree(tree=observed_phylogeny,ancestral_state_trace_vector=anc_states,
-include_start_states=false,
-file=“output/asr_summary_hisse_8_transitions_run_1.tree”, burnin=0.1,
-summary_statistic=“MAP”, site = 1) {% endsnippet %}</p>
-<p>Likewise, we may follow the same process for the stochastic map
-reconstruction, this time using the <code>characterMapTree</code>
-function:</p>
-<p>{% snippet scripts/hisse_8_transitions.Rev %} anc_state_trace =
-readAncestralStateTrace(“output/stochmap_hisse_8_transitions_run_1.log”)</p>
-<p>characterMapTree(observed_phylogeny, anc_state_trace,
-character_file=“output/stochmap_hisse_8_transitions_run_1.tree”,
-posterior_file=“output/posterior_stochmap_hisse_8_transitions_run_1.tree”,
-burnin=0.1, reconstruction=“marginal”) {% endsnippet %}</p>
+<div id="crear-resumen-de-reconstrucción-ancestral-de-caracter" class="section level4">
+<h4>Crear resumen de reconstrucción ancestral de caracter</h4>
+<p>Para resumir los estados ancestrales muestreados durante el análisis
+y posteriormente plotearlos usando RevGadgets, podemos usar las
+funciones <code>readAncestralStateTrace</code> y
+<code>ancestralStateTree</code> en RevBayes.</p>
+<pre><code>anc_states = readAncestralStateTrace(&quot;output/asr_hisse_liolaemus_run_1.log&quot;)
+
+anc_tree = ancestralStateTree(tree=observed_phylogeny,ancestral_state_trace_vector=anc_states, include_start_states=false, file=&quot;output/asr_summary_hisse_liolaemus_run_1.tree&quot;, burnin=0.1, summary_statistic=&quot;MAP&quot;, site = 1)</code></pre>
 </div>
-<div id="visualize-sampled-ancestral-states" class="section level4">
-<h4><strong>Visualize Sampled Ancestral States</strong></h4>
-<p>To generate the following plots, we use the RevGadgets R package {%
-cite Tribble2022 %}, specifically the development functions for
-visualizing stochastic character maps. To install this development
-version of the package, we use the <code>install_github</code> function:
-<code>{R} devtools::install_github(&quot;revbayes/RevGadgets@development&quot;)</code>
-After loading the RevGadgets library, we begin by specifying the path to
-the phylogeny in Nexus format, which is then read into R using the
-readTrees function and stored in the tree object:</p>
-<p>```{R} library(RevGadgets)</p>
-<p>file &lt;- “data/MCC_AFRICANRESTIOS.nex” tree &lt;- readTrees(paths =
-“data/MCC_AFRICANRESTIOS.nex”)</p>
-<p>mapsfile &lt;- “output/stochmap_hisse_8_transitions_run_1.log”</p>
-<pre><code>Next, we process the sampled stochastic maps using the `processStochMaps` function and visualize the summary stochastic map based on maximum a posteriori (MAP) estimates. In addition, we define a vector of colors for graphical purposes:
-```{R}
-stoch_map_df &lt;- processStochMaps(tree,
-                                 mapsfile, 
-                                 state_labels=c(&quot;0&quot; = &quot;Coast A&quot;, &quot;1&quot; = &quot;Mountain A&quot;,
-                                                &quot;2&quot; = &quot;Coast B&quot;, &quot;3&quot; = &quot;Mountain B&quot;), 
-                                 burnin = 0.1)
-
-colors &lt;- c(&quot;Coast A&quot; = &quot;#1d454d&quot;,
-            &quot;Mountain A&quot; = &quot;#cc6633&quot;,
-            &quot;Coast B&quot; = &quot;#8FB5BA&quot;,
-            &quot;Mountain B&quot; = &quot;#F2C7AA&quot;)
-
-plotStochMaps(tree= tree,
-              maps=stoch_map_df,
-              colors = colors,
-              color_by=&quot;MAP&quot;,
-              tree_layout = &quot;rectangular&quot;,
-              tip_labels_size=1,
-              linewidth = 0.8)</code></pre>
-<p>{% figure fig_stoch %} <img role="img" src="figures/stochmap.png" width="70%">
-{% figcaption %} A visualization of the stochastic character map
-estimated under the HiSSE model. {% endfigcaption %} {% endfigure %}
-Likewise, we can visualize the ancestral state reconstruction by loading
-the previously generated output files. First, we use the
-<code>processAncStates</code> function to specify the path to the
-ancestral state reconstruction summary. We then use
-<code>plotAncStatesMAP</code> to generate the final plot, aided by a
-predefined color vector. ```{R} anc_states &lt;- processAncStates(path =
-“output/asr_summary_hisse_8_transitions_run_1.tree”,
-state_labels=c(“0”=“Coast A”, “1”=“Mountain A”, “2”=“Coast B”,
-“3”=“Mountain B”))</p>
-<p>colors &lt;- setNames(c(“#1d454d”, “#cc6633”,“#8FB5BA”,“#F2C7AA”),
-c(“Coast A”, “Mountain A”, “Coast B”, “Mountain B”))</p>
-<p>plotAncStatesMAP(t = anc_states, tree_layout=“rectangular”,
-state_transparency = 0.5, node_size = c(1, 2), tip_labels_size = 1,
-tip_labels_offset = 0.5, node_color = colors)</p>
-<pre><code>{% figure fig_stoch %}
-&lt;img src=&quot;figures/asr.png&quot; width=&quot;70%&quot;&gt;
-{% figcaption %}
-A visualization of the ancestral state reconstruction estimated under the HiSSE model.
-{% endfigcaption %}
-{% endfigure %}
-
-{% section Hypothesis testing | sechypothesis %}
-
-In this section, we describe how to test for differences in transition and diversification rates by constructing test statistics from posterior samples. These test statistics are defined as the differences between the posterior distributions of two transition or diversification rates. This approach, which is possible within a Bayesian framework, provides an alternative to traditional model-selection procedures used in likelihood-based analyses, where inference depends on the specific set of models that are compared.
-
-{% subsection Transition rates | subsec_transition %}
-
-The specified model allows for asymmetric transition rates. These asymmetries can be evaluated by computing the difference between the posterior distributions of pairs of transition rates:
-
-$$
+</div>
+</div>
+<div id="convergencia-del-mcmc" class="section level2">
+<h2>Convergencia del MCMC</h2>
+<p>Vamos a emplear Tracer para observar los resultados del MCMC</p>
+<ul>
+<li><a href="downloads/mk2_polinizador_run_1.log">Primera corrida del
+MCMC</a></li>
+<li><a href="downloads/mk2_polinizador_run_2.log">Segunda corrida del
+MCMC</a></li>
+</ul>
+</div>
+<div id="pruebas-de-hipótesis" class="section level2">
+<h2>Pruebas de hipótesis</h2>
+<p>En esta sección, describimos cómo evaluar las diferencias en las
+tasas de transición y diversificación mediante la construcción de
+estadísticos de prueba a partir de muestras a posteriori. Estos
+estadísticos se definen como las diferencias entre las distribuciones a
+posteriori de dos tasas de transición o diversificación. Este enfoque
+ofrece una alternativa al proceso de selección de modelos empleados en
+análisis basados ​​en verosimilitud, en los cuales la inferencia depende
+del conjunto específico de modelos que se comparan.</p>
+<div id="asimetrías-en-tasas-de-transición" class="section level3">
+<h3>Asimetrías en tasas de transición</h3>
+<p>El modelo especificado permite tasas de transición asimétricas. Estas
+asimetrías pueden evaluarse calculando la diferencia entre las
+distribuciones a posteriori de pares de tasas de transición:</p>
+<p><span class="math display">\[
 T_q =q_{i,j} - q_{j,i}
-$$
-
-We use R to assess differences in transition rates by first loading the required packages, `ggplot2` and `dplyr`. We then use the output of the RevBayes `mnModel` monitor, which contains posterior samples of the estimated parameters, and discard the first 10% of samples as burn-in. Note that the appropriate burn-in fraction may vary across analyses, depending on convergence of the Markov chain.
-
-```{R}
-library(ggplot2)
+\]</span></p>
+<p>En R, carga las librerías requeridas y utilizando los outputs del
+monito <code>mnModel</code> de RevBayes, que contiene las muestras a
+posteriori de los parámetros estimados, y descarta el primer 10% de las
+muestras como burn-in. Esta fracción varía entre análisis de acuerdo a
+la convergencia de las cadenas de Markov.</p>
+<pre><code>library(ggplot2)
 library(dplyr)
 
-hisse_run_1&lt;- read.table(&quot;output/hisse_8_transitions_run_1.log&quot;, header=TRUE)
+hisse_run_1&lt;- read.table(&quot;output/hisse_liolaemus.log&quot;, header=TRUE)
 hisse_run_1&lt;- hisse_run_1[-seq(1,200,1),]</code></pre>
-<p>Subsequently, we create a data frame containing the estimated
-transition rates and visualize them using <code>ggplot2</code>. As shown
-in {% ref fig_transitions %}, the rate <span class="math inline">\(q_{1A,0A}\)</span> is higher than the others,
-suggesting asymmetry between the observed states within hidden state A.
-This distinction is important, as it indicates that transitions between
-coastal and montane ecosystems do not necessarily occur at the same
-evolutionary rate. ```{R} #Transition rates</p>
-<p>transition_rates_hisse_run_1 &lt;- data.frame(
-dens=c(hisse_run_1<span class="math inline">\(q_0A1A,hisse_run_1\)</span>q_1A0A,
-hisse_run_1<span class="math inline">\(q_0B1B,hisse_run_1\)</span>q_1B0B,
-hisse_run_1<span class="math inline">\(q_0A0B,hisse_run_1\)</span>q_0B0A,
-hisse_run_1<span class="math inline">\(q_1A1B,hisse_run_1\)</span>q_1B1A),
-rate=rep(c(“q_0A1A”,“q_1A0A”,“q_0B1B”,“q_1B0B”,“q_0A0B”,“q_0B0A”,“q_1A1B”,“q_1B1A”),each=length(hisse_run_1$q_0A1A)))</p>
-<p>transition_rates_hisse_run_1<span class="math inline">\(rate &lt;-
-  factor(transition_rates_hisse_run_1\)</span>rate, levels =
-c(“q_0A1A”,“q_1A0A”,“q_0B1B”,“q_1B0B”,“q_0A0B”,“q_0B0A”,“q_1A1B”,“q_1B1A”))</p>
-<p>transition_rates_hisse_run_1_plot &lt;-
-ggplot(transition_rates_hisse_run_1,aes(x=rate,y=dens, fill=rate))+
-geom_violin(trim=FALSE)+ scale_fill_manual(values = c(“q_0A1A” =
-“gray95”, “q_1A0A” = “gray95”, “q_0B1B” = “gray95”, “q_1B0B” = “gray95”,
-“q_0A0B” = “gray60”, “q_0B0A” = “gray60”, “q_1A1B” = “gray60”, “q_1B1A”
-= “gray60”)) + labs(title=“Elevation: Model with four states and eight
-transition rates”, x = NULL, y = “Transition rate”)+ theme_classic() +
-theme(legend.position = “none”, plot.title = element_text(hjust = 0.5))
-+ scale_x_discrete(labels = c(“q_0A1A” = expression(italic(q)[“0A,1A”]),
-“q_1A0A” = expression(italic(q)[“1A,0A”]), “q_0B1B” =
-expression(italic(q)[“0B,1B”]), “q_1B0B” =
-expression(italic(q)[“1B,0B”]), “q_0A0B” =
-expression(italic(q)[“0A,B0”]), “q_0B0A” =
-expression(italic(q)[“0B,0A”]), “q_1A1B” =
-expression(italic(q)[“1A,1B”]), “q_1B1A” =
-expression(italic(q)[“1B,1A”])))</p>
-<p>transition_rates_hisse_run_1_plot</p>
-<pre><code>{% figure fig_transitions %}
-&lt;img src=&quot;figures/transition_rates_hisse.png&quot; width=&quot;50%&quot;&gt;
-{% figcaption %}
-Posterior distributions of the transition rates estimated under a full HiSSE model.
-{% endfigcaption %}
-{% endfigure %}
-Furthermore, to formally test whether the rate $q_{1A,0A}$ differs from the others, we compare differences between the posterior distributions of transition rates. To do so, we first construct a new data frame that captures these posterior differences and then visualize them. Transition rates are considered significantly different when the 95% credible interval of the corresponding posterior difference does not include zero.
-```{R}
-#Are transitions different?
+<p>Posteriormente, creamos un data frame con las transiciones estimadas
+y las visualizamos usando <code>ggplot2</code>. Qué tasas de transición
+son diferentes?</p>
+<pre><code>#Transition rates
+
+transition_rates_hisse_run_1 &lt;- 
+  data.frame(
+  dens=c(hisse_run_1$q_0A1A,hisse_run_1$q_1A0A, hisse_run_1$q_0B1B,hisse_run_1$q_1B0B, 
+         hisse_run_1$q_0A0B,hisse_run_1$q_0B0A, hisse_run_1$q_1A1B,hisse_run_1$q_1B1A),
+  rate=rep(c(&quot;q_0A1A&quot;,&quot;q_1A0A&quot;,&quot;q_0B1B&quot;,&quot;q_1B0B&quot;,&quot;q_0A0B&quot;,&quot;q_0B0A&quot;,&quot;q_1A1B&quot;,&quot;q_1B1A&quot;),each=length(hisse_run_1$q_0A1A)))
+
+transition_rates_hisse_run_1$rate &lt;- 
+  factor(transition_rates_hisse_run_1$rate,
+         levels = c(&quot;q_0A1A&quot;,&quot;q_1A0A&quot;,&quot;q_0B1B&quot;,&quot;q_1B0B&quot;,&quot;q_0A0B&quot;,&quot;q_0B0A&quot;,&quot;q_1A1B&quot;,&quot;q_1B1A&quot;))
+
+transition_rates_hisse_run_1_plot &lt;- 
+  ggplot(transition_rates_hisse_run_1,aes(x=rate,y=dens, fill=rate))+
+  geom_violin(trim=FALSE)+
+  scale_fill_manual(values = c(&quot;q_0A1A&quot; = &quot;gray95&quot;, &quot;q_1A0A&quot; = &quot;gray95&quot;, &quot;q_0B1B&quot; = &quot;gray95&quot;, &quot;q_1B0B&quot; = &quot;gray95&quot;,
+                               &quot;q_0A0B&quot; = &quot;gray60&quot;, &quot;q_0B0A&quot; = &quot;gray60&quot;, &quot;q_1A1B&quot; = &quot;gray60&quot;, &quot;q_1B1A&quot; = &quot;gray60&quot;)) +
+  labs(title=&quot;Elevation: Model with four states and eight transition rates&quot;, x = NULL, y = &quot;Transition rate&quot;)+
+  theme_classic() +
+  theme(legend.position = &quot;none&quot;,  plot.title = element_text(hjust = 0.5)) +
+  scale_x_discrete(labels = c(&quot;q_0A1A&quot; = expression(italic(q)[&quot;0A,1A&quot;]), &quot;q_1A0A&quot; = expression(italic(q)[&quot;1A,0A&quot;]),
+                              &quot;q_0B1B&quot; = expression(italic(q)[&quot;0B,1B&quot;]), &quot;q_1B0B&quot; = expression(italic(q)[&quot;1B,0B&quot;]),
+                              &quot;q_0A0B&quot; = expression(italic(q)[&quot;0A,B0&quot;]), &quot;q_0B0A&quot; = expression(italic(q)[&quot;0B,0A&quot;]),
+                              &quot;q_1A1B&quot; = expression(italic(q)[&quot;1A,1B&quot;]), &quot;q_1B1A&quot; = expression(italic(q)[&quot;1B,1A&quot;])))
+
+transition_rates_hisse_run_1_plot</code></pre>
+<p>#Fig</p>
+<p>Para formalmente identificar si la tasa <span class="math inline">\(q_{1A,0A}\)</span> difiere del resto, comparamos
+las diferencias entre las distribuciones posteriores entre las tasas de
+trasición. Consideraos que las tasas de transición son diferentes si el
+95% del intervalo de credibilidad de su diferencia posterior
+correspondiente no incluye 0.</p>
+<pre><code>#Are transitions different?
 
 test_transition_rates_hisse_run_1 &lt;-
   data.frame(dens=c(hisse_run_1$q_0A1A - hisse_run_1$q_1A0A, hisse_run_1$q_0B1B - hisse_run_1$q_1B0B,
@@ -932,83 +797,68 @@ test_transition_rates_hisse_run_1_plot &lt;-
                                 &quot;q_0B0A - q_1B1A&quot; = expression(italic(q)[&quot;0B,A0&quot;] - italic(q)[&quot;1B,A1&quot;])))
 
 test_transition_rates_hisse_run_1_plot</code></pre>
-<p>{% figure fig_test_transitions %}
-<img role="img" src="figures/test_transition_rates_hisse.png" width="70%"> {%
-figcaption %} Test for transition rates estimated under a full HiSSE
-model. {% endfigcaption %} {% endfigure %} We therefore confirm that
-there is asymmetry in the transition rates of our model, with <span class="math inline">\(q_{1A,0A}\)</span> differing from both <span class="math inline">\(q_{0A,1A}\)</span> and <span class="math inline">\(q_{1B,0B}\)</span>. Likewise, we can numerically
-define the 95% credible intervals for the differences between transition
-rates: ```{R} quantile &lt;- test_transition_rates_hisse_run_1 %&gt;%
-group_by(difference)%&gt;%reframe(res=quantile(dens,probs=c(0.025,0.975)))</p>
-<p>quantile</p>
 </div>
-<div id="a-tibble-16-2" class="section level2">
-<h2>A tibble: 16 × 2</h2>
 </div>
-<div id="difference-res" class="section level1">
-<h1>difference res</h1>
-</div>
-<div id="section" class="section level1">
-<h1><fct> <dbl></h1>
-</div>
-<div id="q_0a1a---q_1a0a--0.0503" class="section level1">
-<h1>1 q_0A1A - q_1A0A -0.0503</h1>
-</div>
-<div id="q_0a1a---q_1a0a--0.0138" class="section level1">
-<h1>2 q_0A1A - q_1A0A -0.0138</h1>
-</div>
-<div id="q_0b1b---q_1b0b--0.00967" class="section level1">
-<h1>3 q_0B1B - q_1B0B -0.00967</h1>
-</div>
-<div id="q_0b1b---q_1b0b-0.00715" class="section level1">
-<h1>4 q_0B1B - q_1B0B 0.00715</h1>
-</div>
-<div id="q_0a1a---q_0b1b--0.00709" class="section level1">
-<h1>5 q_0A1A - q_0B1B -0.00709</h1>
-</div>
-<div id="q_0a1a---q_0b1b-0.0161" class="section level1">
-<h1>6 q_0A1A - q_0B1B 0.0161</h1>
-</div>
-<div id="q_1a0a---q_1b0b-0.0194" class="section level1">
-<h1>7 q_1A0A - q_1B0B 0.0194</h1>
-</div>
-<div id="q_1a0a---q_1b0b-0.0503" class="section level1">
-<h1>8 q_1A0A - q_1B0B 0.0503</h1>
-</div>
-<div id="q_0a0b---q_0b0a--0.00697" class="section level1">
-<h1>9 q_0A0B - q_0B0A -0.00697</h1>
-<p>#10 q_0A0B - q_0B0A 0.00745 #11 q_1A1B - q_1B1A -0.0145 #12 q_1A1B -
-q_1B1A 0.0235 #13 q_0A0B - q_1A1B -0.0240 #14 q_0A0B - q_1A1B 0.00577
-#15 q_0B0A - q_1B1A -0.0161 #16 q_0B0A - q_1B1A 0.00459</p>
-<pre><code>
-{% subsection Net diversification rates | subsec_netdiv %}
+<div id="fig" class="section level1">
+<h1>Fig</h1>
+<p>Definimos numéricamente el valor de estas diferencias:</p>
+<pre><code>quantile &lt;- test_transition_rates_hisse_run_1 %&gt;%
+  group_by(difference)%&gt;%reframe(res=quantile(dens,probs=c(0.025,0.975)))
 
-The main advantage of incorporating hidden states into SSE models is that they provide a more appropriate null hypothesis, represented by a CID-2 model, in which diversification rates are allowed to vary independently of the observed states. This framework substantially reduces Type I error by accounting for diversification-rate heterogeneity unrelated to the focal trait:
+quantile
 
-$$
+## A tibble: 16 × 2
+#   difference           res
+#   &lt;fct&gt;              &lt;dbl&gt;
+# 1 q_0A1A - q_1A0A -0.0503 
+# 2 q_0A1A - q_1A0A -0.0138 
+# 3 q_0B1B - q_1B0B -0.00967
+# 4 q_0B1B - q_1B0B  0.00715
+# 5 q_0A1A - q_0B1B -0.00709
+# 6 q_0A1A - q_0B1B  0.0161 
+# 7 q_1A0A - q_1B0B  0.0194 
+# 8 q_1A0A - q_1B0B  0.0503 
+# 9 q_0A0B - q_0B0A -0.00697
+#10 q_0A0B - q_0B0A  0.00745
+#11 q_1A1B - q_1B1A -0.0145 
+#12 q_1A1B - q_1B1A  0.0235 
+#13 q_0A0B - q_1A1B -0.0240 
+#14 q_0A0B - q_1A1B  0.00577
+#15 q_0B0A - q_1B1A -0.0161 
+#16 q_0B0A - q_1B1A  0.00459</code></pre>
+<div id="asimetrías-en-tasas-de-diversificación" class="section level3">
+<h3>Asimetrías en tasas de diversificación</h3>
+<p>La principal ventaja de incorporar estados ocultos en los modelos SSE
+es que proporcionan una hipótesis nula más adecuada, representada por un
+modelo CID-2, en el que se permite que las tasas de diversificación
+varíen independientemente de los estados observados. Este marco reduce
+sustancialmente el error de tipo I al tener en cuenta la heterogeneidad
+en las tasas de diversificación no relacionada con el rasgo de
+interés:</p>
+<p><span class="math display">\[
 H_0:
 \begin{cases}
-d_{0A} = d_{1A} \;\text{   and   }\; d_{0B} = d_{1B} \\
-d_{0A} \neq d_{0B} \;\text{   and   }\; d_{1A} \neq d_{1B}
+d_{0A} = d_{1A} \;\text{   y   }\; d_{0B} = d_{1B} \\
+d_{0A} \neq d_{0B} \;\text{   y   }\; d_{1A} \neq d_{1B}
 \end{cases}
-$$
-
-To test for differences in diversification rates within a Bayesian framework, we propose test statistics derived from posterior samples obtained by fitting a fully parameterized HiSSE model. Differences in net diversification rates between observed states are defined as:
-
-$$
-T_A = d_{0A} - d_{1A} \text{   and   }\ T_B = d_{0B} - d_{1B}
-$$
-
-Similarly, differences in net diversification rates between hidden states are defined as:
-
-$$
-T_0 = d_{0A} - d_{0B} \text{   and   }\ T_1 = d_{1A} - d_{1B}
-$$
-
-Therefore, the null hypothesis $H_0$ can be evaluated using these statistics. A CID-2 model is supported when the 95% credible intervals for $T_A$ and $T_B$ include zero, whereas those for $T_0$ and $T_1$ exclude zero. As illustrated in {% ref fig_rates %}, fitting a HiSSE model within a Bayesian framework can yield multiple outcomes depending on the inferred relationships between observed and hidden states. To estimate these statistics, we first load and visualize the net diversification rate estimates in R.
-
-```{R}
-#Net diversification
+\]</span></p>
+<p>Para evaluar las diferencias en las tasas de diversificación en un
+marco bayesiano, proponemos estadísticos de prueba derivados de muestras
+a posteriori obtenidas mediante el ajuste de un modelo HiSSE totalmente
+parametrizado. Las diferencias en las tasas de diversificación neta
+entre los estados observados se definen como:</p>
+<p><span class="math display">\[
+T_A = d_{0A} - d_{1A} \text{   y   }\ T_B = d_{0B} - d_{1B}
+\]</span> De manera similar, las diferencias en las tasas de
+diversificación neta entre estados ocultos se definen como: <span class="math display">\[
+T_0 = d_{0A} - d_{0B} \text{   y   }\ T_1 = d_{1A} - d_{1B}
+\]</span></p>
+<p>Por lo tanto, la hipótesis nula <span class="math inline">\(H_0\)</span> puede evaluarse utilizando estos
+estadísticos. Un modelo CID-2 es soportada cuando los intervalos de
+credibilidad del 95 % para <span class="math inline">\(T_A\)</span> y
+<span class="math inline">\(T_B\)</span> incluyen a cero, mientras que
+los correspondientes a <span class="math inline">\(T_0\)</span> y <span class="math inline">\(T_1\)</span> lo excluyen.</p>
+<pre><code>#Net diversification
 
 net_diversification_hisse_run_1&lt;- 
   data.frame(dens=c(hisse_run_1$net_diversification.1., hisse_run_1$net_diversification.2.,
@@ -1030,55 +880,40 @@ net_diversification_hisse_run_1_plot &lt;-
                               &quot;net_div_0B&quot; = expression(italic(d)[&quot;0B&quot;]), &quot;net_div_1B&quot; = expression(italic(d)[&quot;1B&quot;])))
 
 net_diversification_hisse_run_1_plot</code></pre>
-<p>{% figure fig_div %}
-<img role="img" src="figures/net_diversification_hisse.png" width="50%"> {%
-figcaption %} Posterior distributions of the net diversification rates
-estimated under a full HiSSE model. {% endfigcaption %} {% endfigure
-%}</p>
-<p>As shown in {% ref fig_div %}, net diversification rates for states
-1A and 1B are higher than those for states 0A and 0B. Examination of the
-test statistics indicates that the 95% credible intervals for <span class="math inline">\(T_A\)</span>, <span class="math inline">\(T_B\)</span>, and <span class="math inline">\(T_1\)</span> do not include zero, whereas the
-credible interval for <span class="math inline">\(T_0\)</span> does
-include zero. This pattern does not fully correspond to either a HiSSE
-or a CID-2 model. ```{R} #Is net diversification different?</p>
-<p>test_net_diversification_hisse_run_1 &lt;-
-data.frame(dens=c(hisse_run_1<span class="math inline">\(net_diversification.1. -
-hisse_run_1\)</span>net_diversification.2., hisse_run_1<span class="math inline">\(net_diversification.3. -
-hisse_run_1\)</span>net_diversification.4., hisse_run_1<span class="math inline">\(net_diversification.1. -
-hisse_run_1\)</span>net_diversification.3., hisse_run_1<span class="math inline">\(net_diversification.2. -
-hisse_run_1\)</span>net_diversification.4.),
-difference=rep(c(“T_A”,“T_B”,“T_0”,“T_1”),
-each=length(hisse_run_1$net_diversification.1.)))</p>
-<p>test_net_diversification_hisse_run_1<span class="math inline">\(difference &lt;-
-factor(test_net_diversification_hisse_run_1\)</span>difference, levels =
-c(“T_A”,“T_B”,“T_0”,“T_1”))</p>
-<p>test_net_diversification_hisse_run_1_plot &lt;-
-ggplot(test_net_diversification_hisse_run_1, aes(x = difference, y =
-dens, fill = difference)) + geom_violin(trim=FALSE, draw_quantiles =
-c(0.025, 0.975))+ scale_fill_manual(values = c(“T_A” = “gray95”, “T_B” =
-“gray95”, “T_0” = “gray60”, “T_1” = “gray60”)) + labs(title =
-“Elevation: Model with four states and eight transition rates”, y =
-“Difference between net diversification rates”, x = NULL) +
-geom_hline(yintercept = 0, linetype = “dashed”, lwd = 1) +
-theme_classic() + theme(legend.position = “none”, plot.title =
-element_text(hjust = 0.5)) + scale_x_discrete(labels = c( “T_A” =
-expression(atop(italic(T)[A], italic(d)[“0A”] - italic(d)[“1A”])), “T_B”
-= expression(atop(italic(T)[B], italic(d)[“0B”] - italic(d)[“1B”])),
-“T_0” = expression(atop(italic(T)[0], italic(d)[“0A”] -
-italic(d)[“0B”])), “T_1” = expression(atop(italic(T)[1], italic(d)[“1A”]
-- italic(d)[“1B”])) ))</p>
-<p>test_net_diversification_hisse_run_1_plot</p>
-<pre><code>{% figure fig_test_div %}
-&lt;img src=&quot;figures/test_net_diversification_hisse.png&quot; width=&quot;50%&quot;&gt;
-{% figcaption %}
-Test for net diversification rates estimated under a full HiSSE model.
-{% endfigcaption %}
-{% endfigure %}
+<p>#Fig</p>
+<p>Qué tasas de diversificación son diferentes? Qué escenario se
+soporta?</p>
+<pre><code>#Is net diversification different?
 
-To corroborate the visual interpretation of {% ref fig_test_div %}, we additionally quantify the 95% credible intervals for $T_A$, $T_B$, $T_0$, and $T_1$.
+test_net_diversification_hisse_run_1 &lt;-
+  data.frame(dens=c(hisse_run_1$net_diversification.1. - hisse_run_1$net_diversification.2.,
+                    hisse_run_1$net_diversification.3. - hisse_run_1$net_diversification.4.,
+                    hisse_run_1$net_diversification.1. - hisse_run_1$net_diversification.3.,
+                    hisse_run_1$net_diversification.2. - hisse_run_1$net_diversification.4.),
+                    difference=rep(c(&quot;T_A&quot;,&quot;T_B&quot;,&quot;T_0&quot;,&quot;T_1&quot;),
+                    each=length(hisse_run_1$net_diversification.1.)))
 
-```{R}
-quantile &lt;- test_net_diversification_hisse_run_1 %&gt;%
+test_net_diversification_hisse_run_1$difference &lt;- factor(test_net_diversification_hisse_run_1$difference,
+         levels = c(&quot;T_A&quot;,&quot;T_B&quot;,&quot;T_0&quot;,&quot;T_1&quot;))
+
+test_net_diversification_hisse_run_1_plot &lt;- 
+    ggplot(test_net_diversification_hisse_run_1, aes(x = difference, y = dens, fill = difference)) +
+    geom_violin(trim=FALSE, draw_quantiles = c(0.025, 0.975))+
+    scale_fill_manual(values = c(&quot;T_A&quot; = &quot;gray95&quot;, &quot;T_B&quot; = &quot;gray95&quot;, &quot;T_0&quot; = &quot;gray60&quot;, &quot;T_1&quot; = &quot;gray60&quot;)) +
+    labs(title = &quot;Elevation: Model with four states and eight transition rates&quot;, y = &quot;Difference between net diversification rates&quot;, x = NULL) +
+    geom_hline(yintercept = 0, linetype = &quot;dashed&quot;, lwd = 1) +
+    theme_classic() +
+    theme(legend.position = &quot;none&quot;,  plot.title = element_text(hjust = 0.5)) +
+    scale_x_discrete(labels = c(
+  &quot;T_A&quot; = expression(atop(italic(T)[A], italic(d)[&quot;0A&quot;] - italic(d)[&quot;1A&quot;])),
+  &quot;T_B&quot; = expression(atop(italic(T)[B], italic(d)[&quot;0B&quot;] - italic(d)[&quot;1B&quot;])),
+  &quot;T_0&quot; = expression(atop(italic(T)[0], italic(d)[&quot;0A&quot;] - italic(d)[&quot;0B&quot;])),
+  &quot;T_1&quot; = expression(atop(italic(T)[1], italic(d)[&quot;1A&quot;] - italic(d)[&quot;1B&quot;]))
+))
+
+test_net_diversification_hisse_run_1_plot</code></pre>
+<p>#Fig</p>
+<pre><code>quantile &lt;- test_net_diversification_hisse_run_1 %&gt;%
   group_by(difference)%&gt;%reframe(res=quantile(dens,probs=c(0.025,0.975)))
 
 quantile
@@ -1094,160 +929,46 @@ quantile
 #6 T_0         0.172 
 #7 T_1         0.0567
 #8 T_1         0.138 </code></pre>
-<p>Overall, fitting a single, fully parameterized HiSSE model with all
-transition and net diversification rates estimated freely is sufficient
-within a Bayesian framework to evaluate multiple hypotheses of
-anagenetic evolution and state-dependent diversification. In this
-example, we identify asymmetry in transition rates, with transitions
-from montane to coastal habitats occurring more frequently in lineages
-associated with hidden state A, and support the hypothesis of {% citet
-Bouchenak-Khelladi2017 %}, as montane ecosystems exhibit higher net
-diversification rates than coastal habitats.</p>
-<p>Furtheremore, we identified that the inferred model does not fully
-correspond to a HiSSE model ({% ref fig_rates %}), because <span class="math inline">\(d_{0A}\)</span> and <span class="math inline">\(d_{0B}\)</span> are not different. The ability to
-identify such gray zone models highlights an important advantage of
-applying a Bayesian framework, as these types of parameter
-specifications are rarely explored under frequentist approaches.</p>
-<p>{% subsection HiSSE with four hidden states | subsec_hisse4 %}</p>
-<p>As a final step, we fit a HiSSE model with four hidden states (A, B,
-C, and D) to evaluate whether a CID-4 model better explains the
-diversification process. Implementing this model requires only two
-modifications to the RevBayes script. First, the NUM_HIDDEN variable
-must be set to four:</p>
-<p>{% snippet scripts/hisse4_tp.Rev %} NUM_HIDDEN &lt;- 4 {% endsnippet
-%}</p>
-<p>Second, the Q matrix must be adjusted. Because we use the
-<code>fnFreeK</code> function to account for asymmetry in transition
-rates, this modification must be implemented manually.</p>
-<p>We begin by specifying each possible transition along with its
-corresponding move proposal:</p>
-<p>{% snippet scripts/hisse4_tp.Rev %} q_0A1A ~ dnGamma(shape=shape_pr,
-rate=rate_pr) # Coast to Montane A q_1A0A ~ dnGamma(shape=shape_pr,
-rate=rate_pr) # Montane to Coast A q_0B1B ~ dnGamma(shape=shape_pr,
-rate=rate_pr) # Coast to Montane B q_1B0B ~ dnGamma(shape=shape_pr,
-rate=rate_pr) # Montane to Coast B q_0C1C ~ dnGamma(shape=shape_pr,
-rate=rate_pr) # Coast to Montane C q_1C0C ~ dnGamma(shape=shape_pr,
-rate=rate_pr) # Montane to Coast C q_0D1D ~ dnGamma(shape=shape_pr,
-rate=rate_pr) # Coast to Montane D q_1D0D ~ dnGamma(shape=shape_pr,
-rate=rate_pr) # Montane to Coast D</p>
-<p>q_0A0B ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_0B0A ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_0A0C ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_0C0A ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_0A0D ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_0D0A ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states</p>
-<p>q_0B0C ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_0C0B ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_0B0D ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_0D0B ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_0C0D ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_0D0C ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states</p>
-<p>q_1A1B ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_1B1A ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_1A1C ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_1C1A ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_1A1D ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_1D1A ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states</p>
-<p>q_1B1C ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_1C1B ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_1B1D ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_1D1B ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_1C1D ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states q_1D1C ~ dnGamma(shape=shape_pr, rate=rate_pr) # Between hidden
-states</p>
-<div id="moves-transitions-between-observed-states" class="section level3">
-<h3>Moves transitions between observed states</h3>
-<p>moves.append(mvSlice(q_0A1A, window = 0.1, weight=2, search_method =
-“stepping_out”)) moves.append(mvSlice(q_1A0A, window = 0.1, weight=2,
-search_method = “stepping_out”)) moves.append(mvSlice(q_0B1B, window =
-0.1, weight=2, search_method = “stepping_out”))
-moves.append(mvSlice(q_1B0B, window = 0.1, weight=2, search_method =
-“stepping_out”)) moves.append(mvSlice(q_0C1C, window = 0.1, weight=2,
-search_method = “stepping_out”)) moves.append(mvSlice(q_1C0C, window =
-0.1, weight=2, search_method = “stepping_out”))
-moves.append(mvSlice(q_0D1D, window = 0.1, weight=2, search_method =
-“stepping_out”)) moves.append(mvSlice(q_1D0D, window = 0.1, weight=2,
-search_method = “stepping_out”))</p>
+<p>En conclusión, definir un único modelo HiSSE totalmente parametrizado
+con todas las tasas de transición y diversificación neta estimadas
+libremente es suficiente dentro de un marco bayesiano para evaluar
+múltiples hipótesis de evolución anagenética y diversificación
+dependiente del estado.</p>
 </div>
-<div id="moves-transitions-between-hidden-states" class="section level3">
-<h3>Moves transitions between hidden states</h3>
-<p>moves.append(mvSlice(q_0A0B, window = 0.1, weight=2, search_method =
-“stepping_out”)) moves.append(mvSlice(q_0B0A, window = 0.1, weight=2,
-search_method = “stepping_out”)) moves.append(mvSlice(q_0A0C, window =
-0.1, weight=2, search_method = “stepping_out”))
-moves.append(mvSlice(q_0C0A, window = 0.1, weight=2, search_method =
-“stepping_out”)) moves.append(mvSlice(q_0A0D, window = 0.1, weight=2,
-search_method = “stepping_out”)) moves.append(mvSlice(q_0D0A, window =
-0.1, weight=2, search_method = “stepping_out”))</p>
-<p>moves.append(mvSlice(q_0B0C, window = 0.1, weight=2, search_method =
-“stepping_out”)) moves.append(mvSlice(q_0C0B, window = 0.1, weight=2,
-search_method = “stepping_out”)) moves.append(mvSlice(q_0B0D, window =
-0.1, weight=2, search_method = “stepping_out”))
-moves.append(mvSlice(q_0D0B, window = 0.1, weight=2, search_method =
-“stepping_out”)) moves.append(mvSlice(q_0C0D, window = 0.1, weight=2,
-search_method = “stepping_out”)) moves.append(mvSlice(q_0D0C, window =
-0.1, weight=2, search_method = “stepping_out”))</p>
-<p>moves.append(mvSlice(q_1A1B, window = 0.1, weight=2, search_method =
-“stepping_out”)) moves.append(mvSlice(q_1B1A, window = 0.1, weight=2,
-search_method = “stepping_out”)) moves.append(mvSlice(q_1A1C, window =
-0.1, weight=2, search_method = “stepping_out”))
-moves.append(mvSlice(q_1C1A, window = 0.1, weight=2, search_method =
-“stepping_out”)) moves.append(mvSlice(q_1A1D, window = 0.1, weight=2,
-search_method = “stepping_out”)) moves.append(mvSlice(q_1D1A, window =
-0.1, weight=2, search_method = “stepping_out”))</p>
-<p>moves.append(mvSlice(q_1B1C, window = 0.1, weight=2, search_method =
-“stepping_out”)) moves.append(mvSlice(q_1C1B, window = 0.1, weight=2,
-search_method = “stepping_out”)) moves.append(mvSlice(q_1B1D, window =
-0.1, weight=2, search_method = “stepping_out”))
-moves.append(mvSlice(q_1D1B, window = 0.1, weight=2, search_method =
-“stepping_out”)) moves.append(mvSlice(q_1C1D, window = 0.1, weight=2,
-search_method = “stepping_out”)) moves.append(mvSlice(q_1D1C, window =
-0.1, weight=2, search_method = “stepping_out”)) {% endsnippet %}</p>
-<p>Then, we create a Q matrix initialized with zeros and assign the
-specified transition rates:</p>
-<p>{% snippet scripts/hisse4_tp.Rev %} for (i in 1:NUM_RATES) { for (j
-in 1:NUM_RATES) { q[i][j] := 0.0 } }</p>
-</div>
-<div id="indices-for-states-10a-21a-30b41b-50c-61c-70d-81d" class="section level2">
-<h2>Indices for states: 1=0A, 2=1A, 3=0B,4=1B, 5=0C, 6=1C, 7=0D,
-8=1D</h2>
-<p>q[1][2] := q_0A1A q[2][1] := q_1A0A q[3][4] := q_0B1B q[4][3] :=
-q_1B0B q[5][6] := q_0C1C q[6][5] := q_1C0C q[7][8] := q_0D1D q[8][7] :=
-q_1D0D</p>
-<p>q[1][3] := q_0A0B q[3][1] := q_0B0A q[1][5] := q_0A0C q[5][1] :=
-q_0C0A q[1][7] := q_0A0D q[7][1] := q_0D0A q[2][4] := q_1A1B q[4][2] :=
-q_1B1A q[2][6] := q_1A1C q[6][2] := q_1C1A q[2][8] := q_1A1D q[8][2] :=
-q_1D1A q[3][5] := q_0B0C q[5][3] := q_0C0B q[3][7] := q_0B0D q[7][3] :=
-q_0D0B q[4][6] := q_1B1C q[6][4] := q_1C1B q[4][8] := q_1B1D q[8][4] :=
-q_1D1B q[5][7] := q_0C0D q[7][5] := q_0D0C q[6][8] := q_1C1D q[8][6] :=
-q_1D1C {% endsnippet %}</p>
-<p>Next, we construct the Q matrix using the <code>fnFreeK</code>
-function and then define the diversification rates, root state
-frequencies, extant sampling fractions, and the overall model
-specification under a birth–death framework, as previously
-described.</p>
-<p>After completing the analyses, we extend the R code presented in the
-<a href="#subsec_netdiv">Net diversification rates</a> subsection to
-define and evaluate the test statistics <span class="math inline">\(T_A\)</span>, <span class="math inline">\(T_B\)</span>, <span class="math inline">\(T_C\)</span>, and <span class="math inline">\(T_D\)</span>, which allows us to formally test the
-CID-4 model:</p>
-<p>{% figure fig_div_4 %}
-<img role="img" src="figures/net_diversification_hisse4.png" width="50%"> {%
-figcaption %} Posterior distributions of the net diversification rates
-estimated under a full HiSSE model with four hidden states. {%
-endfigcaption %} {% endfigure %}</p>
-<p>{% figure fig_test_div_4 %}
-<img role="img" src="figures/test_net_diversification_hisse4.png" width="50%"> {%
-figcaption %} Test for net diversification rates estimated under a full
-HiSSE model with four hidden states. {% endfigcaption %} {% endfigure
-%}</p>
-<p>As shown in {% ref fig_div_4 %} and {% ref fig_test_div_4 %}, we
-detect differences in net diversification rates between the observed
-states (0 and 1) across all hidden states (A, B, C, and D). Therefore,
-we conclude that the previous differences in net diversification rates
-that were identified with the simpler model are supported.</p>
+<div id="visualización-de-estados-ancestrales" class="section level2">
+<h2>Visualización de estados ancestrales</h2>
+<p>Utilizando la librería RevGadgets en R package podemos visualizar la
+reconstrucción ancestral de caracter:</p>
+<p><code>{R} devtools::install_github(&quot;revbayes/RevGadgets@development&quot;) #Esta versión de RevGadgets incluye herramientas para la visualización de mapas estocásticos</code></p>
+<p>Tras cargar RevGadgets, podemos visualizar la reconstrucción de
+estados ancestrales cargando los archivos generados en RevBayes
+previamente:</p>
+<ul>
+<li><a href="downloads/asr_summary_hisse_8_transitions_run_1.tree">Output de
+ancestralStateTree</a></li>
+</ul>
+<p>En primer lugar, utilizamos la función <code>processAncStates</code>
+para especificar la ruta al resumen de la reconstrucción de estados
+ancestrales. A continuación, empleamos <code>plotAncStatesMAP</code>
+para generar el gráfico final, con la ayuda de un vector de colores
+predefinido.</p>
+<pre><code>anc_states &lt;- processAncStates(path = &quot;output/asr_summary_hisse_8_transitions_run_1.tree&quot;,
+                               state_labels=c(&quot;0&quot;=&quot;Coast A&quot;,
+                                              &quot;1&quot;=&quot;Mountain A&quot;,
+                                              &quot;2&quot;=&quot;Coast B&quot;,
+                                              &quot;3&quot;=&quot;Mountain B&quot;))
+
+colors &lt;- setNames(c(&quot;#1d454d&quot;, &quot;#cc6633&quot;,&quot;#8FB5BA&quot;,&quot;#F2C7AA&quot;),
+                   c(&quot;Coast A&quot;, &quot;Mountain A&quot;, &quot;Coast B&quot;, &quot;Mountain B&quot;))
+
+plotAncStatesMAP(t = anc_states,
+                 tree_layout=&quot;rectangular&quot;,
+                 state_transparency = 0.5,
+                 node_size = c(1, 2),
+                 tip_labels_size = 1,
+                 tip_labels_offset = 0.5,
+                 node_color = colors)</code></pre>
+<p>#Fig</p>
 </div>
 </div>
 
