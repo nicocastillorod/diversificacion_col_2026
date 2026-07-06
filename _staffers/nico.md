@@ -2,7 +2,7 @@
 name: Nicolás Castillo Rodríguez
 role: Instructor
 email: nicolas.castillo@uky.edu
-website: https://nicocastillorod.github.io/
+website: https://bio.as.uky.edu/users/nca281
 photo: nico.jpg
 meta:
   Estudiante doctoral de la Universidad de Kentucky
