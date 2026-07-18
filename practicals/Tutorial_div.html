@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Identificando la heterogeneidad en tasas de diversificación</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Tutorial_div_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Tutorial_div_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="Tutorial_div_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="Tutorial_div_files/libs/quarto-html/popper.min.js"></script>
+<script src="Tutorial_div_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Tutorial_div_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Tutorial_div_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Tutorial_div_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Tutorial_div_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Tutorial_div_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Tutorial_div_files/libs/bootstrap/bootstrap-138a6193a3bd40baf1e627da441a4734.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Identificando la heterogeneidad en tasas de diversificación</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="tutorial-y-script-creado-por-juan-diego-rodríguez-rodríguez." class="level4">
+<h4 class="anchored" data-anchor-id="tutorial-y-script-creado-por-juan-diego-rodríguez-rodríguez.">Tutorial y script creado por Juan Diego Rodríguez-Rodríguez.</h4>
+<section id="actualizado-en-julio-2026." class="level5">
+<h5 class="anchored" data-anchor-id="actualizado-en-julio-2026.">Actualizado en Julio 2026.</h5>
+<p>En este tutorial vamos a aprender a utilizar tres métodos diferentes para estimar la heterogeneidad en las tasas de diversificación: Lineage Specific Birth Death Shift Model (LSBDS) (Hönha, 2026); Cladogenetic Diversification rate Shift (ClaDS) model . Estos métodos se caracterizan por estimar las tasas de diversificación para cada una de las ramas de la filogenia estudiada. Existen una gran cantidad de métodos utilizados para este fin, pero difieren en sus supuestos, algoritmos y en los resultados que arrojan. Por lo que es indispensable ser conciente de las limitaciones de cada método y la inciertidumbre asociada al mismo. Lo recomendable es utliizar varios métodos y comparar sus resultados, evitando reportar solo estimadores puntuales.</p>
+</section>
+</section>
+<section id="filogenia-a-utilizar" class="level1">
+<h1>Filogenia a utilizar</h1>
+<p>En este tutorial vamos a análizar la filogena de la familia Liolaemidae publicada por Esquerré et al (2019) <a href="https://doi.org/10.1111/evo.13657" class="uri">https://doi.org/10.1111/evo.13657</a>, una familia de lagartos que habitan en la parte sur de Sudamérica, cuya diversidad de especies está principalmente dada por el género Liolaemus y muy ligada a los hábitats andinos de alta montaña.</p>
+<p>Vamos a crear tres carpetas para el tutorial: <code>data</code> <code>output</code> y <code>scripts</code>, el unico archivo que vamos a usar en este tutorial se llama <code>Liolaemidae_2022.nex</code>, el cual corresponde al árbol de máxima credibilidad (MCC).</p>
+</section>
+<section id="lineage-specific-birth-death-shift-model" class="level1">
+<h1>Lineage Specific Birth Death Shift Model</h1>
+<p>Primero vamos a ajustar un modelo LSBDS, el cual discretiza las tasas de diversificación ajustando una distribución continua en n intervamos (Igual que Yang, 2004) para evitar tener que calcularlos en una distribución continua (Lo cual es computacionalmente imposible) para despues asignar estas tasas a cada rama a tráves de un mapeo estocastico (SCM).</p>
+<p>Este modelo es implementado en el Software RevBayes <a href="https://revbayes.github.io/" class="uri">https://revbayes.github.io/</a>, el cual es un programa que ofrece mucha flexibilidad en la construcción de los modelos, ya que exige especificar cada uno de los parametros del mismo.</p>
+<p>Este programa tiene dos variables principales, la version “base”, que se ejecuta como <code>rb</code>, y la versión “multicore”, que se ejecuta como <code>rb-mpi</code> y permite que cada uno de los nucleos ejecute una cadena del análisis.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="do">##Filogenia</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>phy <span class="ot">&lt;-</span> <span class="fu">readTrees</span>( <span class="st">"./data/Liolaemidae_2022.nex"</span>)[<span class="dv">1</span>]</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="do">##Información de la filogenia</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>taxa <span class="ot">&lt;-</span> <span class="fu">phy.taxa</span>()</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>root <span class="ot">&lt;-</span> <span class="fu">phy.rootAge</span>()</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>tree_length <span class="ot">&lt;-</span> <span class="fu">phy.treeLength</span>()</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="do">##Movimientos y monitores</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>moves <span class="ot">=</span> <span class="fu">VectorMoves</span>()</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>monitors <span class="ot">=</span> <span class="fu">VectorMonitors</span>()</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="do">##Parametros globales</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>NUM_RATES <span class="ot">=</span> <span class="dv">10</span> <span class="do">##Vamos a dividir el continuo de las tasas de diversificación en 10 categorías discretas</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>EXP_NUM_SHIFTS <span class="ot">=</span> <span class="dv">10</span> <span class="do">##Esperamos encontrar más o menos 10 cambios en las tasas de diversificación </span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="do">##Probabilidad de muestreo, como no tenemos información de todas las especies actuales (algunas aún no están descritas) es necesario especificar la probabilidad de que una especie sea incluida en la filogenia.</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>NUM_TOTAL_SPECIES <span class="ot">=</span> <span class="dv">353</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>rho<span class="ot">&lt;-</span><span class="fu">phy.ntips</span>() <span class="sc">/</span> NUM_TOTAL_SPECIES </span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="do">###Prior on specieation and extintion rates </span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>rate_mean <span class="ot">&lt;-</span> (NUM_TOTAL_SPECIES<span class="dv">-2</span>) <span class="sc">/</span> tree_length</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>H <span class="ot">=</span> <span class="fl">0.587405</span> <span class="co">#Desviación estandar de las tasas, este valor es un prior razonable para poder representar diferencias de 3 a 100 veces en las tasas de diversificación </span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co">#Honha et al. (2017) </span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>rate_sd <span class="ot">&lt;-</span> H</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="do">##Distribución exponencial para la desviación estandar de las tasas de diversificación</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>rate_sd <span class="sc">~</span> <span class="fu">dnExponential</span>(<span class="fl">1.0</span> <span class="sc">/</span> H)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">moves.append</span>( <span class="fu">mvScale</span>(rate_sd, <span class="at">lambda =</span><span class="dv">1</span>, <span class="at">tune =</span> true, <span class="at">weight =</span><span class="fl">2.0</span>) )</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="do">##Prior con distribución LogNormal discretizada para las tasas de especiación</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>speciation_mean <span class="sc">~</span> <span class="fu">dnUniform</span>( <span class="fl">0.0</span>, <span class="dv">100</span> )</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="fu">speciation_mean.setValue</span>( rate_mean )</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="fu">moves.append</span>( <span class="fu">mvScale</span>(speciation_mean, <span class="at">lambda =</span> <span class="dv">1</span>, <span class="at">tune =</span> true, <span class="at">weight =</span> <span class="fl">2.0</span>) )</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>speciation <span class="sc">:</span><span class="er">=</span> <span class="fu">fnDiscretizeDistribution</span>( <span class="fu">dnLognormal</span>(<span class="fu">ln</span>(speciation_mean),rate_sd),NUM_RATES)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="do">##Prior  uniforme para las tasas de extinción</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>extinction_mean <span class="sc">~</span> <span class="fu">dnUniform</span> ( <span class="fl">0.0</span>, <span class="dv">100</span> )</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="fu">extinction_mean.setValue</span>( rate_mean <span class="sc">/</span> <span class="fl">2.0</span> ) <span class="do">##La mitad de las tasas de especiación</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="fu">moves.append</span>( <span class="fu">mvScale</span>(extinction_mean, <span class="at">lambda =</span> <span class="dv">1</span>, <span class="at">tune =</span> true, <span class="at">weight =</span> <span class="fl">2.0</span>))</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="do">##Asumir que las tasas de extinción son constantes en cada una de las categorias (una tasa de extinción global)</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>extinction <span class="sc">:</span><span class="er">=</span> <span class="fu">rep</span>(extinction_mean,NUM_RATES)</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="do">### Prior con distribución uniforme para la tasa de cambio entre regimenes de diversificación</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>shift_rate <span class="sc">~</span> <span class="fu">dnUniform</span>(<span class="fl">0.0</span>, <span class="fl">100.0</span><span class="sc">/</span>tree_length)</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="fu">shift_rate.setValue</span>(<span class="fl">2.0</span><span class="sc">/</span>tree_length)</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="fu">moves.append</span>( <span class="fu">mvScale</span>(shift_rate, <span class="at">lambda=</span><span class="dv">1</span>, <span class="at">tune=</span>true, <span class="at">weight=</span><span class="fl">2.0</span>) )</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="do">##Uniform dist for rate category at the root</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a><span class="do">##Prior con distribución uniforme para cada categoría </span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>rate_cat_probs <span class="ot">&lt;-</span> <span class="fu">simplex</span>( <span class="fu">rep</span>(<span class="dv">1</span>,NUM_RATES))</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a><span class="do">##Variable para el árbol producto del proceso de nacimiento y muerte </span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>timetree <span class="sc">~</span> <span class="fu">dnCDBDP</span> (<span class="at">rootAge =</span> root,</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>                    <span class="at">speciationRates =</span> speciation,</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>                    <span class="at">extinctionRates =</span> extinction,</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>                    <span class="at">Q =</span> <span class="fu">fnJC</span>(NUM_RATES),</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>                    <span class="at">delta =</span> shift_rate,</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>                    <span class="at">pi =</span> rate_cat_probs,</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>                    <span class="at">rho =</span> rho,</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>                    <span class="at">condition =</span> <span class="st">"time"</span>)</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a><span class="do">###Establecer el árbol como observado</span></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="fu">timetree.clamp</span>(phy)</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a><span class="do">##Configurar modelo</span></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>mymodel <span class="ot">=</span> <span class="fu">model</span>(speciation) </span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a><span class="co">#Configurar los monitores, uno para los diagnosticos del modelo y otro con los resultados del SCM</span></span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a><span class="fu">monitors.append</span>( <span class="fu">mnScreen</span>(<span class="at">printgen=</span><span class="dv">1000</span>, shift_rate, speciation_mean) )</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a><span class="fu">monitors.append</span>( <span class="fu">mnStochasticBranchRate</span>(<span class="at">cdbdp=</span>timetree, <span class="at">printgen=</span><span class="dv">100</span>, <span class="at">filename=</span><span class="st">"output/liolaemidae_LSBDS_SCM.log"</span>) )</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a><span class="fu">monitors.append</span>( <span class="fu">mnModel</span>(<span class="at">filename=</span><span class="st">"output/liolaemidae_LSBDS_model.log"</span>) )</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a><span class="do">##MCMC</span></span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>mymcmc <span class="ot">=</span> <span class="fu">mcmc</span>(mymodel, monitors, moves, <span class="at">nruns=</span><span class="dv">16</span>, <span class="at">combine=</span><span class="st">"mixed"</span>)</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a><span class="do">##Al ser cadenas que pueden ser largas (varios días/semanas) idealmente hay que generar un archivo de punto de guardado para poder reanudar en análisis si llega a interrumpirse</span></span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a><span class="co">#mymcmc.initializeFromCheckpoint("output/liolaemidae_LSBDS_model.state")</span></span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>stopping_rules[<span class="dv">1</span>] <span class="ot">=</span> <span class="fu">srMinESS</span>(<span class="dv">250</span>, <span class="at">file =</span> <span class="st">"output/liolaemidae_LSBDS_model.log"</span>, <span class="at">freq =</span> <span class="dv">10000</span>)</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a><span class="fu">mymcmc.run</span>(<span class="at">rules =</span> stopping_rules, <span class="at">checkpointInterval =</span> <span class="dv">1000</span>, <span class="at">checkpointFile =</span> <span class="st">"output/liolaemidae_LSBDS_model.state"</span>)</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a><span class="do">##Correr el MCMC con generaciones fijas</span></span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a><span class="fu">mymcmc.run</span>(<span class="at">generations =</span> <span class="dv">50000</span>, <span class="at">tuningInterval=</span><span class="dv">200</span>, <span class="at">checkpointFile =</span> <span class="st">"output/liolaemidae_LSBDS_model.state"</span>)</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a><span class="do">##QUIT</span></span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a><span class="fu">q</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Para poder graficar los resultados del análisis en R, es necesario instalar y activar los siguientes paquetes y crear unas funciones (Código adaptado de Hönha, 2026)</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggtree)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidytree)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(treeio)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ape)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RevGadgets)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>matchNodes <span class="ot">=</span> <span class="cf">function</span>(phy) {</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get some useful info</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  num_tips <span class="ot">=</span> <span class="fu">length</span>(phy<span class="sc">$</span>tip.label)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  num_nodes <span class="ot">=</span> phy<span class="sc">$</span>Nnode</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  tip_indexes <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>num_tips</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  node_indexes <span class="ot">=</span> num_tips <span class="sc">+</span> num_nodes<span class="sc">:</span><span class="dv">1</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  node_map <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">R=</span><span class="dv">1</span><span class="sc">:</span>(num_tips <span class="sc">+</span> num_nodes), <span class="at">Rev=</span><span class="cn">NA</span>, <span class="at">visits=</span><span class="dv">0</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  current_node <span class="ot">=</span> phy<span class="sc">$</span>Nnode <span class="sc">+</span> <span class="dv">2</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  k <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  t <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(<span class="cn">TRUE</span>) {</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ( current_node <span class="sc">&lt;=</span> num_tips ) {</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>      node_map<span class="sc">$</span>Rev[node_map<span class="sc">$</span>R <span class="sc">==</span> current_node] <span class="ot">=</span> t</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>      current_node <span class="ot">=</span> phy<span class="sc">$</span>edge[phy<span class="sc">$</span>edge[,<span class="dv">2</span>] <span class="sc">==</span> current_node,<span class="dv">1</span>]</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>      t <span class="ot">=</span> t <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> ( node_map<span class="sc">$</span>visits[node_map<span class="sc">$</span>R <span class="sc">==</span> current_node] <span class="sc">==</span> <span class="dv">0</span> ) {</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        node_map<span class="sc">$</span>Rev[node_map<span class="sc">$</span>R <span class="sc">==</span> current_node] <span class="ot">=</span> node_indexes[k]</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        k <span class="ot">=</span> k <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>      node_map<span class="sc">$</span>visits[node_map<span class="sc">$</span>R <span class="sc">==</span> current_node] <span class="ot">=</span> node_map<span class="sc">$</span>visits[node_map<span class="sc">$</span>R <span class="sc">==</span> current_node] <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> ( node_map<span class="sc">$</span>visits[node_map<span class="sc">$</span>R <span class="sc">==</span> current_node] <span class="sc">==</span> <span class="dv">1</span> ) {</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        <span class="co"># go right</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        current_node <span class="ot">=</span> phy<span class="sc">$</span>edge[phy<span class="sc">$</span>edge[,<span class="dv">1</span>] <span class="sc">==</span> current_node,<span class="dv">2</span>][<span class="dv">2</span>]</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> <span class="cf">if</span> ( node_map<span class="sc">$</span>visits[node_map<span class="sc">$</span>R <span class="sc">==</span> current_node] <span class="sc">==</span> <span class="dv">2</span> ) {</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        <span class="co"># go left</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>        current_node <span class="ot">=</span> phy<span class="sc">$</span>edge[phy<span class="sc">$</span>edge[,<span class="dv">1</span>] <span class="sc">==</span> current_node,<span class="dv">2</span>][<span class="dv">1</span>]</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> <span class="cf">if</span> ( node_map<span class="sc">$</span>visits[node_map<span class="sc">$</span>R <span class="sc">==</span> current_node] <span class="sc">==</span> <span class="dv">3</span> ) {</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>        <span class="co"># go down</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (current_node <span class="sc">==</span> num_tips <span class="sc">+</span> <span class="dv">1</span>) {</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>          <span class="cf">break</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>          current_node <span class="ot">=</span> phy<span class="sc">$</span>edge[phy<span class="sc">$</span>edge[,<span class="dv">2</span>] <span class="sc">==</span> current_node,<span class="dv">1</span>]</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(node_map[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>addLegend <span class="ot">=</span> <span class="cf">function</span>(tree, bins, colors, <span class="at">width=</span><span class="fl">0.1</span>, <span class="at">height=</span><span class="fl">0.4</span>, <span class="at">lwd=</span><span class="dv">1</span>, <span class="at">title=</span><span class="st">"posterior probability"</span>, ...) {</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>  lastPP <span class="ot">&lt;-</span> <span class="fu">get</span>(<span class="st">"last_plot.phylo"</span>, <span class="at">envir =</span> .PlotPhyloEnv)</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>  x_left   <span class="ot">=</span> width</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>  x_right  <span class="ot">=</span> width <span class="sc">+</span> width <span class="sc">*</span> lastPP<span class="sc">$</span>x.lim[<span class="dv">2</span>]</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>  y_bottom <span class="ot">=</span> bins[<span class="sc">-</span><span class="fu">length</span>(bins)] <span class="sc">*</span> height <span class="sc">*</span> <span class="fu">length</span>(tree<span class="sc">$</span>tip.label)</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>  y_top    <span class="ot">=</span> bins[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">*</span> height <span class="sc">*</span> <span class="fu">length</span>(tree<span class="sc">$</span>tip.label)</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>  ticks <span class="ot">=</span> <span class="fu">pretty</span>(bins)</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>  ticks <span class="ot">=</span> ticks[ticks <span class="sc">&gt;</span> <span class="fu">min</span>(bins)]</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>  ticks <span class="ot">=</span> ticks[ticks <span class="sc">&lt;</span> <span class="fu">max</span>(bins)]</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>  y_tick <span class="ot">=</span> ticks <span class="sc">*</span> height <span class="sc">*</span> <span class="fu">length</span>(tree<span class="sc">$</span>tip.label)</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(lwd <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>    <span class="fu">segments</span>(<span class="at">x0=</span>x_right, <span class="at">x1=</span>x_right <span class="sc">+</span> <span class="fl">0.01</span> <span class="sc">*</span> <span class="fu">abs</span>(<span class="fu">diff</span>(lastPP<span class="sc">$</span>x.lim)), <span class="at">y0=</span>y_tick, <span class="at">lwd=</span>lwd, ...)</span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(<span class="at">x=</span>x_right <span class="sc">+</span> <span class="fl">0.02</span> <span class="sc">*</span> <span class="fu">abs</span>(<span class="fu">diff</span>(lastPP<span class="sc">$</span>x.lim)), <span class="at">y=</span>y_tick, <span class="at">label=</span>ticks, <span class="at">adj=</span><span class="dv">0</span>, ...)</span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rect</span>(x_left, y_bottom, x_right, y_top, <span class="at">col=</span>colors, <span class="at">border=</span>colors)</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">text</span>(x_left <span class="sc">-</span> width <span class="sc">/</span> <span class="fl">1.5</span>, <span class="fu">mean</span>(bins) <span class="sc">*</span> height <span class="sc">*</span> <span class="fu">length</span>(tree<span class="sc">$</span>tip.label), <span class="at">labels=</span>title, <span class="at">srt=</span><span class="dv">90</span>, ...)</span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>  <span class="co"># text(x=x_left, y=max(y_top) + 0.02 * length(tree$tip.label), labels=title, adj=0, ...)</span></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>  <span class="co"># points(x=x_left, y=max(y_top) + 0.05 * length(tree$tip.label))</span></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Este método produce dos archivos de salida, uno con los parametros del modelo y sus probabilidades y otro con el resultado del mapeo estocastico de tasa de diversificación.</p>
+<p>Acá es importante notar que vamos a obtener más detalle al dividir en más categorías las tasas de diversificación, pero eso va a implicar una mayor carga computacional (Este análisis del ejemplo tardó aproximadamente 2 días en un cluster utilizando un hilo para cada cadena) por lo que vamos a utilizar el archivo <code>liolaemidae_LSBDS_SCM.log</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>samples <span class="ot">=</span>  <span class="fu">read.table</span>(<span class="st">"./output_2/liolaemidae_LSBDS_SCM.log"</span>, <span class="at">sep=</span><span class="st">"</span><span class="sc">\t</span><span class="st">"</span>,</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">stringsAsFactors=</span><span class="cn">FALSE</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">check.names=</span><span class="cn">FALSE</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">header=</span><span class="cn">TRUE</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>n_samples <span class="ot">=</span> <span class="fu">nrow</span>(samples)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>lambda_output   <span class="ot">=</span> samples[<span class="fu">grepl</span>(<span class="st">"avg_lambda"</span>, <span class="fu">colnames</span>(samples))] <span class="do">##Con esto se extraen las columnas correspondientes a las tasas de especiación, aunque también es posible extraer las correspondientes a tasas de extinción o calcular diversificación neta</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>lambda_mean<span class="ot">&lt;-</span><span class="fu">colMeans</span>(lambda_output) <span class="do">##Para poder ver los resultados del SCM vamos a promediar los valores de cada una de las replicas</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>branch_lambdas <span class="ot">&lt;-</span> lambda_mean[<span class="sc">-</span><span class="fu">length</span>(lambda_mean)]</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>tree<span class="ot">&lt;-</span><span class="fu">read.nexus</span>(<span class="st">"./data/Liolaemidae_2022.nex"</span>) </span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>map <span class="ot">=</span> <span class="fu">matchNodes</span>(tree) <span class="do">##Esto es necesario para poder asignar los valores a las ramas</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>lambda_intervals <span class="ot">=</span> <span class="fu">range</span>(branch_lambdas)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>these_lambdas <span class="ot">&lt;-</span> branch_lambdas[<span class="fu">paste0</span>(<span class="st">"avg_lambda["</span>, map<span class="sc">$</span>Rev[<span class="fu">match</span>(tree<span class="sc">$</span>edge[,<span class="dv">2</span>], map<span class="sc">$</span>R)], <span class="st">"]"</span>)]</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>lambda_tree <span class="ot">&lt;-</span> tree</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>lambda_tree<span class="sc">$</span>edge.length <span class="ot">&lt;-</span> these_lambdas</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>lambda_tbl <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(lambda_tree)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>tree_tbl <span class="ot">=</span> <span class="fu">as_tibble</span>(tree)</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>tree_tbl<span class="sc">$</span>rates  <span class="ot">&lt;-</span> lambda_tbl<span class="sc">$</span>branch.length</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>this_tree       <span class="ot">&lt;-</span> <span class="fu">as.treedata</span>(tree_tbl)<span class="do">##Esto crea un objeto donde los valores de las ramas están directamente asociados a las .-.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Ahora vamos a graficar los resultados utilizando dos paletas de color diferentes <code>viridis</code> y <code>spectral</code>, la elección de la paleta es un proceso bastante importante, ya que algunos patrones no son facilmente distinguibles si elegimos la paleta incorrrecta.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>lsbds_viridis <span class="ot">&lt;-</span> <span class="fu">ggtree</span>(this_tree, <span class="fu">aes</span>(<span class="at">color =</span> rates)) <span class="sc">+</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>     <span class="fu">scale_color_viridis_c</span>(<span class="st">"Speciation rate LSBDS"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                           <span class="at">option =</span> <span class="st">"viridis"</span>,  </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                           <span class="at">limits =</span> lambda_intervals) <span class="sc">+</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position      =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.85</span>),</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">legend.background    =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">plot.title           =</span> <span class="fu">element_text</span>(<span class="at">lineheight =</span> .<span class="dv">8</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>                                               <span class="at">face  =</span> <span class="st">"bold"</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">hjust =</span> <span class="fl">0.5</span>))</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>lsbds_viridis                    </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Tutorial_div_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>lsbds_spectral <span class="ot">&lt;-</span> <span class="fu">ggtree</span>(this_tree, <span class="fu">aes</span>(<span class="at">color =</span> rates)) <span class="sc">+</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>      <span class="fu">scale_color_distiller</span>(<span class="at">name =</span> <span class="st">"Speciation rate LSBDS"</span>, <span class="at">palette =</span> <span class="st">"Spectral"</span>)<span class="sc">+</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position      =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.85</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">legend.background    =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">plot.title           =</span> <span class="fu">element_text</span>(<span class="at">lineheight =</span> .<span class="dv">8</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                                               <span class="at">face  =</span> <span class="st">"bold"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                                                <span class="at">hjust =</span> <span class="fl">0.5</span>))          </span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>lsbds_spectral</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Tutorial_div_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Con esta función se guarda la ultima grafica de ggplot en el formato, resolución y tamaño que se quiera (PFD, TIFF, SVG, PNG, etc)</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"LSBDS_Liolaemidae_10_cats.pdf"</span>, <span class="at">width=</span><span class="dv">15</span>, <span class="at">height=</span><span class="dv">15</span>, <span class="at">units=</span><span class="st">"cm"</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="phylogenetic-estimation-of-branch-specific-shifts-in-the-tempo-of-origination" class="level1">
+<h1>Phylogenetic Estimation of Branch-Specific Shifts in the Tempo of Origination</h1>
+<p>Ahora, realizaremos un análisis utilizando el modelo PESTO, este método es implementado en el lenguaje de programación Julia y tiene la característica de no depender de cadenas de Markov (MCMC) por lo que es bastante eficiente computacionalmente (Puede procesar filogenias de más de mil terminales en un computador personal en un tiempo razonable), sin embargo solo resulta en un set de estimados puntuales, por lo que idealmente debe realizarse en una muestra de árboles de la distribución posterior (esto se puede realizar a traves de un loop).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>import Pkg</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">Pkg.add</span>(<span class="at">url=</span><span class="st">"https://github.com/kopperud/Pesto.jl"</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>using Pesto</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>phy <span class="ot">=</span> <span class="fu">readtree</span>(<span class="st">"./data/Liolaemidae_2022.nex"</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>sampling_fraction <span class="ot">=</span> <span class="fl">0.72</span> <span class="do">##243 de las 353 especies reconocidas </span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>lio_divrates <span class="ot">=</span> <span class="fu">SSEdata</span>(phy, sampling_fraction)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>model, rates <span class="ot">=</span> <span class="fu">pesto</span>(lio_divrates)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="fu">writenewick</span>(<span class="st">"./output/liolaemidae_pesto.tre"</span>, lio_divrates, rates)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="fu">Pkg.add</span>(<span class="st">"Makie"</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="fu">Pkg.add</span>(<span class="st">"CairoMakie"</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>using Makie, CairoMakie</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="fu">treeplot</span>(lio_divrates,rates)</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>df <span class="ot">=</span> <span class="fu">tip_rates</span>(model, lio_divrates)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>f <span class="ot">=</span> <span class="fu">Figure</span>(<span class="at">resolution =</span> (<span class="dv">600</span>, <span class="dv">600</span>))</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>axs <span class="ot">=</span> []</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>colors <span class="ot">=</span> [<span class="sc">:</span>blue, <span class="sc">:</span>red, <span class="sc">:</span>green, <span class="sc">:</span>orange]</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i, rate) <span class="cf">in</span> <span class="fu">enumerate</span>([<span class="sc">:</span>lambda, <span class="sc">:</span>mu, <span class="sc">:</span>netdiv, <span class="sc">:</span>relext])</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    ax <span class="ot">=</span> <span class="fu">Axis</span>(f[i,<span class="dv">1</span>],</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>        <span class="at">xgridvisible =</span> false,</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>        <span class="at">ygridvisible =</span> false,</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>        <span class="at">xlabel =</span> <span class="fu">string</span>(<span class="st">"Tip rate ("</span>, rate, <span class="st">")"</span>),</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylabel =</span> <span class="st">"Frequency"</span>)</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    hist<span class="sc">!</span>(ax, df[<span class="sc">!</span>,rate], <span class="at">bins=</span><span class="dv">30</span>, <span class="at">color =</span> colors[i])</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>end</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>rowgap<span class="sc">!</span>(f.layout, <span class="fl">5.0</span>)</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>f</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>using Pkg</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="fu">Pkg.add</span>(<span class="st">"CSV"</span>)</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>using CSV</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a><span class="fu">CSV.write</span>(<span class="st">"./output/liolaemidae_pesto.csv"</span>, df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>A pesar de que se pueden graficar los resultados de PESTO directamente en Julia. Exportar el resultado y graficar a través de R es recomendable debido a que permite un mayor control de las paletas de colores y las formas del árbol gracias a paquetes como <code>ggtree</code> y <code>treeio</code>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pesto_rates<span class="ot">&lt;-</span> treeio<span class="sc">::</span><span class="fu">read.beast.newick</span>(<span class="st">"./output/liolaemidae_pesto.tre"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>pesto_viridis <span class="ot">&lt;-</span> <span class="fu">ggtree</span>(pesto_rates, <span class="at">layout =</span> <span class="st">"rectangular"</span>) <span class="sc">+</span> </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>     <span class="fu">geom_tree</span>(<span class="fu">aes</span>(<span class="at">color =</span> mean_lambda)) <span class="sc">+</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>     <span class="fu">scale_color_viridis_c</span>(<span class="at">name =</span> <span class="st">"Speciation rate PESTO"</span>, <span class="at">option =</span> <span class="st">"D"</span>) <span class="sc">+</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.85</span>))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>pesto_viridis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Tutorial_div_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>pesto_spectral <span class="ot">&lt;-</span> <span class="fu">ggtree</span>(pesto_rates, <span class="at">layout =</span> <span class="st">"rectangular"</span>) <span class="sc">+</span> </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>     <span class="fu">geom_tree</span>(<span class="fu">aes</span>(<span class="at">color =</span> mean_lambda)) <span class="sc">+</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_distiller</span>(<span class="at">name =</span> <span class="st">"Speciation rate PESTO"</span>, <span class="at">palette =</span> <span class="st">"Spectral"</span>)<span class="sc">+</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.85</span>))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>pesto_spectral</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Tutorial_div_files/figure-html/unnamed-chunk-7-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Con esta función se guarda la ultima grafica (de ggplot) en el formato, resolución y tamaño que se quiera (PFD, TIFF, SVG, PNG, etc)</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"PESTO_Liolaemidae.pdf"</span>, <span class="at">width=</span><span class="dv">15</span>, <span class="at">height=</span><span class="dv">15</span>, <span class="at">units=</span><span class="st">"cm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="cladogenetic-diversification-shift-model" class="level1">
+<h1>Cladogenetic Diversification Shift model</h1>
+<p>Finalmente, vamos a hacer un análisis de ClaDS. Este método difiere de los dos anteriores debido a que busca detectar pequeños cambios en la tasa de diversificación en cada evento cladogenético en lugar de buscar regimenes discretos de diversificación.</p>
+<p>Este modelo es implementado en Julia, aunque toma prestadas funciones de R a través del paquete <code>RCall</code>. Sin embargo, en el momento, por temas de compatibilidad es necesario tener la version de R <code>4.3.3</code>.</p>
+<section id="para-windows" class="level3">
+<h3 class="anchored" data-anchor-id="para-windows">Para windows</h3>
+<p>Descargar <a href="https://cran.r-project.org/bin/windows/base/old/4.3.3" class="uri">https://cran.r-project.org/bin/windows/base/old/4.3.3</a></p>
+</section>
+<section id="para-macos" class="level3">
+<h3 class="anchored" data-anchor-id="para-macos">Para MacOS</h3>
+<p>Para chips Apple Silicon descargar <a href="https://cran.r-project.org/bin/macosx/big-sur-arm64/base/R-4.3.3-arm64.pkg" class="uri">https://cran.r-project.org/bin/macosx/big-sur-arm64/base/R-4.3.3-arm64.pkg</a> Para chips Intel descargar <a href="https://cran.r-project.org/bin/macosx/big-sur-x86_64/base/R-4.3.3-x86_64.pkg" class="uri">https://cran.r-project.org/bin/macosx/big-sur-x86_64/base/R-4.3.3-x86_64.pkg</a></p>
+</section>
+<section id="para-linux" class="level3">
+<h3 class="anchored" data-anchor-id="para-linux">Para Linux</h3>
+<p>Ejecutar el siguiente codigo en la terminal</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>wget https<span class="sc">:</span><span class="er">//</span>cran.r<span class="sc">-</span>project.org<span class="sc">/</span>src<span class="sc">/</span>base<span class="sc">/</span>R<span class="dv">-4</span><span class="sc">/</span>R<span class="dv">-4</span>.<span class="dv">3</span>.<span class="fl">3.</span>tar.gz</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>tar xzf R<span class="dv">-4</span>.<span class="dv">3</span>.<span class="fl">3.</span>tar.gz</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>cd R<span class="dv">-4</span>.<span class="fl">3.3</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>sudo apt<span class="sc">-</span>get install build<span class="sc">-</span>essential gfortran libreadline<span class="sc">-</span>dev libx11<span class="sc">-</span>dev libxt<span class="sc">-</span>dev</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>.<span class="sc">/</span>configure <span class="sc">--</span>prefix<span class="ot">=</span><span class="er">/</span>opt<span class="sc">/</span>R<span class="sc">/</span><span class="dv">4</span>.<span class="fl">3.3</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>make <span class="sc">&amp;&amp;</span> sudo make install</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Ahora vamos a ejecutar ClaDS utilizando el paquete PANDA, para poder usar la versión de R que necesitamos, vamos a crear un ambiente para que Julia solo utilice esa versión de R cuando se esté usando PANDA.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>using Pkg</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">Pkg.activate</span>(<span class="st">"./PANDAenv"</span>) <span class="do">##Es necesario cada vez que se necesite usar PANDA </span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Pkg.add("PANDA")</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>using PANDA</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">=</span> <span class="fu">load_tree</span>(<span class="st">"./data/Liolaemidae_2022.nex"</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>output <span class="ot">=</span> <span class="fu">infer_ClaDS</span>(tree, <span class="at">f =</span> <span class="fl">0.72</span>) <span class="co">#f corresponde al parametro ρ (fracción de muestreo)</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_CladsOutput</span>(output)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="fu">save_ClaDS_in_R</span>(output,<span class="st">"./output/claDS_liolaemidae_output.R"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Análisis de los resultados de ClaDS</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"./output/claDS_liolaemidae_output.R"</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> CladsOutput[<span class="dv">1</span>]<span class="sc">$</span>tree</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>lambda_clads_map <span class="ot">&lt;-</span> CladsOutput[<span class="dv">8</span>]<span class="sc">$</span>lambdai_map</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>lambda_clads_tip <span class="ot">&lt;-</span> CladsOutput[<span class="dv">9</span>]<span class="sc">$</span>lambdatip_map</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>clads_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">node =</span> tree<span class="sc">$</span>edge[, <span class="dv">2</span>],</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">rate =</span> lambda_clads_map</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>clads_viridis <span class="ot">&lt;-</span> <span class="fu">ggtree</span>(tree, <span class="at">layout =</span> <span class="st">"rectangular"</span>) <span class="sc">%&lt;+%</span> clads_data <span class="sc">+</span>  <span class="fu">geom_tree</span>(<span class="fu">aes</span>(<span class="at">color =</span> rate)) <span class="sc">+</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>     <span class="fu">scale_color_viridis_c</span>(<span class="at">name =</span> <span class="st">"Speciation rate ClaDS"</span>, <span class="at">option =</span> <span class="st">"D"</span>, <span class="at">trans =</span> <span class="st">"log10"</span>)  <span class="sc">+</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.85</span>))</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>clads_viridis</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Tutorial_div_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>clads_spectral <span class="ot">&lt;-</span> <span class="fu">ggtree</span>(tree, <span class="at">layout =</span> <span class="st">"rectangular"</span>) <span class="sc">%&lt;+%</span> clads_data <span class="sc">+</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>     <span class="fu">geom_tree</span>(<span class="fu">aes</span>(<span class="at">color =</span> rate)) <span class="sc">+</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>     <span class="fu">scale_color_distiller</span>(<span class="at">name =</span> <span class="st">"Speciation rate ClaDS"</span>, <span class="at">palette =</span> <span class="st">"Spectral"</span>,<span class="at">trans=</span><span class="st">"log10"</span>) <span class="sc">+</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>     <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.85</span>))</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>clads_spectral</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Tutorial_div_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Con esta función se guarda la ultima grafica (de ggplot) en el formato, resolución y tamaño que se quiera (PFD, TIFF, SVG, PNG, etc)</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"ClaDS_Liolaemidae.pdf"</span>, <span class="at">width=</span><span class="dv">15</span>, <span class="at">height=</span><span class="dv">15</span>, <span class="at">units=</span><span class="st">"cm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="bibliografía" class="level1">
+<h1>Bibliografía</h1>
+<p>Höhna, S., Freyman, W. A., Nolen, Z., Huelsenbeck, J. P., May, M. R., Rannala, B., &amp; Moore, B. R. (2026). Inferring Branch-Specific Rates of Lineage Diversification Under the Birth–Death-Shift Process. Systematic Biology, syag003. <a href="https://doi.org/10.1093/sysbio/syag003" class="uri">https://doi.org/10.1093/sysbio/syag003</a></p>
+<p>Kopperud, B. T., &amp; Höhna, S. (2025). Phylogenetic Estimation of Branch-Specific Shifts in the Tempo of Origination. Systematic Biology, 74(6), 985–1006. <a href="https://doi.org/10.1093/sysbio/syaf041" class="uri">https://doi.org/10.1093/sysbio/syaf041</a></p>
+<p>Maliet, O., Hartig, F., &amp; Morlon, H. (2019). A model with many small shifts for estimating species-specific diversification rates. Nature Ecology &amp; Evolution, 3(7), 1086–1092. <a href="https://doi.org/10.1038/s41559-019-0908-0" class="uri">https://doi.org/10.1038/s41559-019-0908-0</a></p>
+<p>Martínez-Gómez, J., Song, M. J., Tribble, C. M., Kopperud, B. T., Freyman, W. A., Höhna, S., Specht, C. D., &amp; Rothfels, C. J. (2024). Commonly used Bayesian diversification methods lead to biologically meaningful differences in branch-specific rates on empirical phylogenies. Evolution Letters, 8(2), 189–199. <a href="https://doi.org/10.1093/evlett/qrad044" class="uri">https://doi.org/10.1093/evlett/qrad044</a></p>
+<p>Zenil-Ferguson, R., &amp; Liow, L. H. (2025). Simpson’s tachytely or bradytely? The importance of quantifying rate uncertainty. Methods in Ecology and Evolution, 16, 4–18. <a href="https://doi.org/10.1111/2041-210X.14442" class="uri">https://doi.org/10.1111/2041-210X.14442</a></p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
