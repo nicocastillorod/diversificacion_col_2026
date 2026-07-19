@@ -11,10 +11,10 @@ math: katex
 ## Funciones de distribución de probabilidad
 
 Exploradores de distribuciones de probabilidad:
-[Distribution explorer](https://distribution-explorer.github.io/index.html)
-[Probability Playground](https://probabilityplayground.com)
-[Visual introduction to probability and statistics](https://seeing-theory.brown.edu)
-[Prior distributions from Rev code](https://mikeryanmay.shinyapps.io/plotprior/)
+1. [Distribution explorer](https://distribution-explorer.github.io/index.html)
+2. [Probability Playground](https://probabilityplayground.com)
+3. [Visual introduction to probability and statistics](https://seeing-theory.brown.edu)
+4. [Prior distributions from Rev code](https://mikeryanmay.shinyapps.io/plotprior/)
  
 ## Recursos de RevBayes
  
