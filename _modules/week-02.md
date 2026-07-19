@@ -11,5 +11,8 @@ Miércoles
   : [Tutorial](https://nicocastillorod.github.io/diversificacion_col_2026/practicals/hisse_hypothesis_testing.html)
 
 : **Discusión**{: .label .label-green } Conclusiones del taller: Alcances y limitaciones 
+
+: **Recursos**{: .label .label-yellow } Herramientas para seguir aprendiendo
+  : [Lista de recursos](../practicals/recursos)
   
 
