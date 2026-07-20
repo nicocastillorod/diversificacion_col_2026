@@ -417,13 +417,17 @@ NUM_RATES = NUM_STATES * NUM_HIDDEN</code></pre>
 <p>Utilizando las funciones <code>readTrees</code> y
 <code>readCharacterDataDelimited</code>, cargamos en RevBayes los
 archivos con la filogenia y caracteres a utilizar.</p>
-<pre><code>observed_phylogeny &lt;- readTrees(&quot;data/MCC_AFRICANRESTIOS.tre&quot;)[1]
+<pre><code>observed_phylogeny &lt;- readTrees(&quot;data/Liolaemidae_146.tree&quot;)[1]
 
-data &lt;- readCharacterDataDelimited(&quot;data/Elevation_322spp.tsv&quot;,
+# 0 = Oviparous
+# 1 = Viviparous
+# ? = Unknown
+
+data &lt;- readCharacterDataDelimited(&quot;data/liolaemidae_viviparity.csv&quot;,
                                    stateLabels=2,
                                    type=&quot;NaturalNumbers&quot;,
-                                   delimiter=&quot;\t&quot;,
-                                   header=FALSE)</code></pre>
+                                   delimiter=&quot;,&quot;,
+                                   header=TRUE)</code></pre>
 <p>Con la función <code>expandCharacters</code> extendemos nuestros
 datos de 0 y 1, a 0A, 0B, 1A y 1B.</p>
 <pre><code>data_exp &lt;- data.expandCharacters(NUM_HIDDEN)</code></pre>
